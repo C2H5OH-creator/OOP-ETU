@@ -27,6 +27,9 @@
     <ClCompile Include="Complex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Polynom.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">
@@ -42,6 +45,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Complex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Polynom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

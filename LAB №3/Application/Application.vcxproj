@@ -131,6 +131,7 @@
     <ClCompile Include="Array.cpp" />
     <ClCompile Include="Complex.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Polynom.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -138,6 +139,7 @@
     <ClInclude Include="Complex.h" />
     <ClInclude Include="enums.h" />
     <ClInclude Include="number.h" />
+    <ClInclude Include="Polynom.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
