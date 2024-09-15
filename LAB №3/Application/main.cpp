@@ -4,6 +4,7 @@
 #include <windows.h>
 
 #include "Application.h"
+#include "Polynom.h"
 #include "enums.h"
 #include "Array.h"
 
@@ -21,10 +22,10 @@ void KeyHandler(const int& t_keyInput, Application* t_menu, int menuType = 0) {
 
 int main() {
     int keyInput = 0;
-    bool vectorExist = false;
+    bool polynomExist = false;
 
     auto mainMenu = new Application();
-    auto array = new Array();
+    auto polynom = new Polynom();
     mainMenu->MainMenu();
 
     do {
@@ -34,82 +35,37 @@ int main() {
         mainMenu->MainMenu();
         unsigned arrowPoss = mainMenu->GetArrowPoss();
        
-        if (keyInput == ONE || (arrowPoss == CREATE_ARRAY && keyInput == ENTER)) {
-            if (array->Create() && vectorExist == false) {
-                vectorExist = true;
-                std::cout << "Создан пустой массив!";
+        if (keyInput == ONE || (arrowPoss == CREATE_POLYNOM && keyInput == ENTER)) {
+            if (polynom->Create() && polynomExist == false) {
+                polynomExist = true;
+                std::cout << "Создан полином!";
             }
             else {
-                std::cout << "Массив уже создан!";
+                std::cout << "Полином уже и так создан!";
             }
         }
-        else if (keyInput == TWO || (arrowPoss == SKO && keyInput == ENTER)) {
-            if (array->GetArray().empty()) {
-                std::cout << "Массив ещё не создан!" << std::endl;
-            }
-            else {
-                std::cout << "Среднее значение: " << array->Mean() << std::endl;
-                std::cout << "Стандартное отклонение: " << array->StandardDeviation() << std::endl;
-            }
+        else if (keyInput == TWO || (arrowPoss == CHANGE_POLYNOM_COEFFS && keyInput == ENTER)) {
+            polynom->SetValue();
         }
-        else if (keyInput == THREE || (arrowPoss == SORT && keyInput == ENTER)) {
-            system("cls");
-            int sortKeyInput = 0;
-            auto sortMenu = new Application();
-            sortMenu->SortMenu();
-
-            do {
-                sortKeyInput = _getch();
-                system("cls");
-                KeyHandler(sortKeyInput, sortMenu);
-                sortMenu->SortMenu();
-                unsigned arrowPoss = sortMenu->GetArrowPoss();
-
-                if (sortKeyInput == ONE
-                    || (arrowPoss == SORT_ASCENDING && sortKeyInput == ENTER)) { 
-                    if (array->Sort()) { std::cout << "Массив отсортирован по возрастанию" << std::endl; }
-                }
-                else if (sortKeyInput == TWO
-                    || (arrowPoss == SORT_DESCENDING && sortKeyInput == ENTER)) {
-                    if (array->Sort(false)) { std::cout << "Массив отсортирован по убыванию" << std::endl; }
-                }
-                else if (sortKeyInput == THREE 
-                    || (arrowPoss == SORT_EXIT && sortKeyInput == ENTER)) { break; }
-            } while (sortKeyInput != ESC);
-            system("cls");
-            delete sortMenu;
-            mainMenu->MainMenu();
+        else if (keyInput == THREE || (arrowPoss == CALCULATE_VALUE_POLYNOMIAL_AT_POINT && keyInput == ENTER)) {
+            number x;
+            std::cout << "Введите точку: ";
+            std::cin >> x;
+            std::cout << "Значение полинома в точке: " << polynom->evaluateAtPoint(x);
         }
-        else if (keyInput == FOUR || (arrowPoss == CHANGE_ARRAY_SIZE && keyInput == ENTER)) {
-            std::cout << "Нынешний размер массива: " << array->GetArray().size() << std::endl;
+        else if (keyInput == FOUR || (arrowPoss == CHANGE_POLYNOM_SIZE && keyInput == ENTER)) {
+            std::cout << "Нынешний размер полинома: " << polynom->GetRoots()->GetArray().size() << std::endl;
             std::cout << "Введите новый размер: ";
-            int newArraySize;
-            std::cin >> newArraySize;
-            if (array->ChangeSize(newArraySize)) {
-                std::cout << "Размер изменён. Теперь размер: " + std::to_string(newArraySize);
+            int newPolynomSize;
+            std::cin >> newPolynomSize;
+            if (polynom->GetRoots()->ChangeSize(newPolynomSize)) {
+                std::cout << "Размер изменён. Теперь размер: " + std::to_string(newPolynomSize);
             }
         }
-        else if (keyInput == FIVE || (arrowPoss == CHANGE_ITEM_VALUE && keyInput == ENTER)) {
-            number value;
-            unsigned index;
-            std::cout << "Введите значение: " << std::endl;
-            std::cin >> value;
-           
-            std::cout << "Введите индекс: ";
-            std::cin >> index;
-            if (index > array->GetArray().size()) {
-                std::cout << "Индекс выходит за границы массива. Введите другой индекс!" << std::endl;
-                std::cout << "Введите индекс: ";
-                std::cin >> index;
-            }
-            array->SetValue(index, value);
-            system("cls");
-            mainMenu->MainMenu();
+        else if (keyInput == FIVE || (arrowPoss == PRINT_POLYNOM && keyInput == ENTER)) {
+            std::cout << polynom;
         }
-        else if (keyInput == SIX || (arrowPoss == PRINT_ARRAY && keyInput == ENTER)) {
-            array->Print();
-        }
-        else if (keyInput == SEVEN || (arrowPoss == EXIT && keyInput == ENTER)) {
+        else if (keyInput == SIX || (arrowPoss == EXIT && keyInput == ENTER)) {
             break;
         }
     } while (keyInput != ESC);

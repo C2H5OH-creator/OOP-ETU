@@ -24,15 +24,14 @@ enum menuConst {
 
     MAIN_MENU = -1,
 
-    CREATE_ARRAY = 0,
-    SKO = 1,
-    SORT = 2,
-    CHANGE_ARRAY_SIZE = 3,
-    CHANGE_ITEM_VALUE = 4,
-    PRINT_ARRAY = 5,
-    EXIT = 6,
+    CREATE_POLYNOM = 0,
+    CHANGE_POLYNOM_COEFFS = 1,
+    CALCULATE_VALUE_POLYNOMIAL_AT_POINT = 2,
+    CHANGE_POLYNOM_SIZE = 3,
+    PRINT_POLYNOM = 4,
+    EXIT = 5,
 
     SORT_ASCENDING = 0,
     SORT_DESCENDING = 1,
-    SORT_EXIT = 2
+    SORT_EXIT = 2,
 };

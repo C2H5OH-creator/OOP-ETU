@@ -14,12 +14,11 @@ public:
     void SetArrowPoss(unsigned t_arrowPoss) { arrowPoss = t_arrowPoss; };
     
 private:
-    std::vector<std::string> mainMenuItems = { "Создать массив",
-                                    "Расчет среднего и СКО",
-                                    "Сортировка",
+    std::vector<std::string> mainMenuItems = { "Ввести корни и An полинома",
+                                    "Изменить An или любой другой корень",
+                                    "Вычислить значение полинома в точке",
                                     "Изменить размер массива",
-                                    "Изменить значение конкретного элемента",
-                                    "Вывести элементы массива",
+                                    "Вывести полином",
                                         "Выход" };
     std::vector<std::string> sortMenuItems = { "Сортировать массив по возрастанию",
                                     "Сортировать массив по убыванию",
