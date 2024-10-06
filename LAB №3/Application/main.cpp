@@ -41,7 +41,8 @@ int main() {
                 std::cout << "Создан полином!";
             }
             else {
-                std::cout << "Полином уже и так создан!";
+                polynom->Clear();
+                polynomExist = false;
             }
         }
         else if (keyInput == TWO || (arrowPoss == CHANGE_POLYNOM_COEFFS && keyInput == ENTER)) {
@@ -49,7 +50,7 @@ int main() {
         }
         else if (keyInput == THREE || (arrowPoss == CALCULATE_VALUE_POLYNOMIAL_AT_POINT && keyInput == ENTER)) {
             number x;
-            std::cout << "Введите точку: ";
+            std::cout << "Введите точку: " << std::endl;
             std::cin >> x;
             std::cout << "Значение полинома в точке: " << polynom->evaluateAtPoint(x);
         }
@@ -63,8 +64,9 @@ int main() {
             }
         }
         else if (keyInput == FIVE || (arrowPoss == PRINT_POLYNOM && keyInput == ENTER)) {
-            std::cout << polynom;
-        }
+            //polynom->PrintCanonicalForm();
+            polynom->PrintNonCanonicalForm();
+        } 
         else if (keyInput == SIX || (arrowPoss == EXIT && keyInput == ENTER)) {
             break;
         }

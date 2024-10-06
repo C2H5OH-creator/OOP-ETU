@@ -21,7 +21,7 @@ public:
 	number Mean();
 	number StandardDeviation();
 
-	std::vector<number> GetArray() { return array; };
+	std::vector<number>& GetArray() { return array; };
 
 private:
 	std::vector<number> array;
