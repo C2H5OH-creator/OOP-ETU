@@ -1,7 +1,9 @@
+#define NOMINMAX
 #include <iostream>
 #include <stdio.h>
 #include <conio.h>
 #include <windows.h>
+#include <limits>
 
 #include "Application.h"
 #include "Polynom.h"
@@ -36,13 +38,17 @@ int main() {
         unsigned arrowPoss = mainMenu->GetArrowPoss();
        
         if (keyInput == ONE || (arrowPoss == CREATE_POLYNOM && keyInput == ENTER)) {
-            if (polynom->Create() && polynomExist == false) {
+            if (polynomExist) {
+                polynom->Clear();
+                std::cout << "Старый полином очищен!" << std::endl;
+                polynomExist = false;
+            }
+            if (polynom->Create()) {
                 polynomExist = true;
-                std::cout << "Создан полином!";
+                std::cout << "Создан новый полином!" << std::endl;
             }
             else {
-                polynom->Clear();
-                polynomExist = false;
+                std::cout << "Ошибка при создании полинома." << std::endl;
             }
         }
         else if (keyInput == TWO || (arrowPoss == CHANGE_POLYNOM_COEFFS && keyInput == ENTER)) {
@@ -54,20 +60,26 @@ int main() {
             std::cin >> x;
             std::cout << "Значение полинома в точке: " << polynom->evaluateAtPoint(x);
         }
-        else if (keyInput == FOUR || (arrowPoss == CHANGE_POLYNOM_SIZE && keyInput == ENTER)) {
-            std::cout << "Нынешний размер полинома: " << polynom->GetRoots()->GetArray().size() << std::endl;
-            std::cout << "Введите новый размер: ";
-            int newPolynomSize;
-            std::cin >> newPolynomSize;
-            if (polynom->GetRoots()->ChangeSize(newPolynomSize)) {
-                std::cout << "Размер изменён. Теперь размер: " + std::to_string(newPolynomSize);
+        else if (keyInput == FOUR|| (arrowPoss == PRINT_POLYNOM && keyInput == ENTER)) {
+            bool printType;
+            std::cout << "Выберите форму вывода (каноническая - 0, корни - 1) : ";
+            std::cin >> printType;
+            while (printType != 1 && printType != 0 || std::cin.fail()) {
+                std::cout << "Введите корректное число. Либо 1, либо 0: ";
+                std::cin.clear();
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                std::cin >> printType;
             }
-        }
-        else if (keyInput == FIVE || (arrowPoss == PRINT_POLYNOM && keyInput == ENTER)) {
-            //polynom->PrintCanonicalForm();
-            polynom->PrintNonCanonicalForm();
+            switch (printType) {
+            case 0:
+                polynom->PrintCanonicalForm();
+                break;
+            case 1:
+                polynom->PrintNonCanonicalForm();
+                break;
+            }
         } 
-        else if (keyInput == SIX || (arrowPoss == EXIT && keyInput == ENTER)) {
+        else if (keyInput == FIVE || (arrowPoss == EXIT && keyInput == ENTER)) {
             break;
         }
     } while (keyInput != ESC);

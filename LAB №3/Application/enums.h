@@ -19,7 +19,7 @@ enum keys
 };
 
 enum menuConst {
-    MAIN_MENU_HIGHT = 6,
+    MAIN_MENU_HIGHT = 4,
     SORT_MENU_HIGHT = 2,
 
     MAIN_MENU = -1,
@@ -27,9 +27,8 @@ enum menuConst {
     CREATE_POLYNOM = 0,
     CHANGE_POLYNOM_COEFFS = 1,
     CALCULATE_VALUE_POLYNOMIAL_AT_POINT = 2,
-    CHANGE_POLYNOM_SIZE = 3,
-    PRINT_POLYNOM = 4,
-    EXIT = 5,
+    PRINT_POLYNOM = 3,
+    EXIT = 4,
 
     SORT_ASCENDING = 0,
     SORT_DESCENDING = 1,
