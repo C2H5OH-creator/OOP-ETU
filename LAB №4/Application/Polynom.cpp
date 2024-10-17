@@ -126,7 +126,7 @@ void Polynom::PrintNonCanonicalForm() {
 	}
 
 	// Выводим ведущий коэффициент
-	std::cout << "Не каноническая форма полинома: (" << anCoeff << ") * ";
+	std::cout << "Каноническая форма полинома: (" << anCoeff << ") * ";
 
 	for (size_t i = 0; i < roots->GetArray().size(); ++i) {
 		std::cout << "(x - (" << roots->GetArray()[i] << "))";
