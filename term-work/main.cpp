@@ -1,12 +1,12 @@
-#include "gamewindow.h"
+#include "menuwindow.h"
 
 #include <QApplication>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    GameWindow window(9); // Задайте размер поля
-    window.resize(400, 400);
-    window.show();
+    MenuWindow menuWindow;
+    menuWindow.resize(400, 400);
+    menuWindow.show();
     return a.exec();
 }

@@ -12,12 +12,14 @@ SOURCES += \
     custombutton.cpp \
     customgrid.cpp \
     gamewindow.cpp \
-    main.cpp
+    main.cpp \
+    menuwindow.cpp
 
 HEADERS += \
     custombutton.h \
     customgrid.h \
-    gamewindow.h
+    gamewindow.h \
+    menuwindow.h
 
 FORMS +=
 

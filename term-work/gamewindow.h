@@ -10,7 +10,7 @@
 class GameWindow : public QWidget {
         Q_OBJECT
 public:
-        GameWindow(int size, QWidget *parent = nullptr);
+        GameWindow(const QString &title, int fieldSize, QWidget *parent = nullptr);
 
 };
 

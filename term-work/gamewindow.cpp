@@ -2,8 +2,8 @@
 #include <QLabel>
 #include <QHBoxLayout>
 
-GameWindow::GameWindow(int size, QWidget *parent) : QWidget(parent) {
-    setWindowTitle("Псевдоморской бой");
+GameWindow::GameWindow(const QString &title, int fieldSize, QWidget *parent) : QWidget(parent) {
+    setWindowTitle(title);
 
     // Основной вертикальный лэйаут для всего окна
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
@@ -27,8 +27,8 @@ GameWindow::GameWindow(int size, QWidget *parent) : QWidget(parent) {
     QHBoxLayout *gridLayout = new QHBoxLayout;
 
     // Создание полей
-    auto playerGrid = new CustomGrid(false,size, size);
-    auto opponentGrid = new CustomGrid(true,size, size);
+    auto playerGrid = new CustomGrid(false,fieldSize, fieldSize);
+    auto opponentGrid = new CustomGrid(true,fieldSize, fieldSize);
 
     // Добавляем сетки в горизонтальный лэйаут
     gridLayout->addWidget(playerGrid);
