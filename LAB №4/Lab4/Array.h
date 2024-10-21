@@ -18,12 +18,12 @@ public:
 	bool ChangeSize(unsigned t_size);
 	bool Print();
 
-	number Mean();
-	number StandardDeviation();
+    number Mean();
+    number StandardDeviation();
 
-	std::vector<number>& GetArray() { return array; };
+    std::vector<number>& GetArray() { return array; };
 
 private:
-	std::vector<number> array;
+    std::vector<number> array;
 };
 

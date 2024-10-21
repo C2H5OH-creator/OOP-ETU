@@ -9,10 +9,6 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    ../Application/Application.cpp \
-    ../Application/Array.cpp \
-    ../Application/Complex.cpp \
-    ../Application/Polynom.cpp \
     Array.cpp \
     Complex.cpp \
     Polynom.cpp \
@@ -20,12 +16,6 @@ SOURCES += \
     main.cpp
 
 HEADERS += \
-    ../Application/Application.h \
-    ../Application/Array.h \
-    ../Application/Complex.h \
-    ../Application/Polynom.h \
-    ../Application/enums.h \
-    ../Application/number.h \
     Array.h \
     Complex.h \
     Polynom.h \

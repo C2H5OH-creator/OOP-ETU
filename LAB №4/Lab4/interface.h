@@ -9,6 +9,7 @@
 #include <QWidget>
 #include <QLabel>
 #include <QLineEdit>
+#include <QPushButton>
 
 class Interface : public QMainWindow
 {
@@ -33,5 +34,7 @@ private:
     QWidget *changeValueWidget;
     QWidget *calcPolynomWidget;
     QWidget *printPolynomWidget;
+
+    std::vector<QLineEdit> inputFields;
 };
 #endif // INTERFACE_H

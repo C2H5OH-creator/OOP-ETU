@@ -10,10 +10,10 @@ Interface::Interface(QWidget *parent)
     // Левый Layout для радиокнопок
     leftLayout = new QVBoxLayout();
 
-    auto *createPolynom = new QRadioButton("Ввести корни и An полинома", this);
-    auto *changeValue = new QRadioButton("Изменить An или любой другой корень", this);
-    auto *calcPolynom = new QRadioButton("Вычислить значение полинома в точке", this);
-    auto *printPolynom = new QRadioButton("Вывести полином", this);
+    auto createPolynom = new QRadioButton("Ввести корни и An полинома", this);
+    auto changeValue = new QRadioButton("Изменить An или любой другой корень", this);
+    auto calcPolynom = new QRadioButton("Вычислить значение полинома в точке", this);
+    auto printPolynom = new QRadioButton("Вывести полином", this);
 
     // Подключение сигналов
     connect(createPolynom, &QRadioButton::clicked, this, &Interface::OnCreatePolynomClicked);
@@ -34,21 +34,54 @@ Interface::Interface(QWidget *parent)
     createPolynomWidget = new QWidget(this);
     QVBoxLayout *createLayout = new QVBoxLayout(createPolynomWidget);
     createLayout->addWidget(new QLabel("Сколько корней вы хотите?", this));
-    createLayout->addWidget(new QLineEdit(this));  // Поле ввода для количества корней
+    auto rootCountInput = new QLineEdit(this);  // Поле ввода для количества корней
+    createLayout->addWidget(rootCountInput);
     createLayout->addWidget(new QLabel("Введите первый коэффициент An:", this));
-    createLayout->addWidget(new QLineEdit(this));  // Поле ввода для An
+    auto aNInput = new QLineEdit(this);  // Поле ввода для An
+    createLayout->addWidget(aNInput);
+
+    // Кнопка подтверждения для создания полинома
+    QPushButton *confirmCreateButton = new QPushButton("Подтвердить", this);
+    connect(confirmCreateButton, &QPushButton::clicked, [this, rootCountInput, aNInput]() {
+       createPolynom(rootCount, aN);
+    });
+    createLayout->addWidget(confirmCreateButton);
 
     // Виджет для изменения значения
     changeValueWidget = new QWidget(this);
     QVBoxLayout *changeLayout = new QVBoxLayout(changeValueWidget);
     changeLayout->addWidget(new QLabel("Введите новый An или корень:", this));
-    changeLayout->addWidget(new QLineEdit(this));  // Поле ввода для изменения
+    auto *changeInput = new QLineEdit(this);  // Поле ввода для изменения
+    changeLayout->addWidget(changeInput);
+
+    // Кнопка подтверждения для изменения значения
+    QPushButton *confirmChangeButton = new QPushButton("Подтвердить", this);
+    connect(confirmChangeButton, &QPushButton::clicked, [this, changeInput]() {
+        // Обработка ввода
+        double newValue = changeInput->text().toDouble();
+        // Вызов функции для изменения значения
+        //changePolynomValue(newValue);
+    });
+    changeLayout->addWidget(confirmChangeButton);
 
     // Виджет для вычисления значения полинома
     calcPolynomWidget = new QWidget(this);
     QVBoxLayout *calcLayout = new QVBoxLayout(calcPolynomWidget);
     calcLayout->addWidget(new QLabel("Введите значение для вычисления:", this));
-    calcLayout->addWidget(new QLineEdit(this));  // Поле ввода для вычисления
+    auto *calcInput = new QLineEdit(this);  // Поле ввода для вычисления
+    calcLayout->addWidget(calcInput);
+
+    // Кнопка подтверждения для вычисления
+    QPushButton *confirmCalcButton = new QPushButton("Подтвердить", this);
+    connect(confirmCalcButton, &QPushButton::clicked, [this, calcInput]() {
+        // Обработка ввода
+        double value = calcInput->text().toDouble();
+        // Вызов функции для вычисления полинома
+        //double result = calculatePolynom(value);
+        // Отображение результата
+        //QMessageBox::information(this, "Результат", QString("Значение полинома: %1").arg(result));
+    });
+    calcLayout->addWidget(confirmCalcButton);
 
     // Виджет для вывода полинома
     printPolynomWidget = new QWidget(this);

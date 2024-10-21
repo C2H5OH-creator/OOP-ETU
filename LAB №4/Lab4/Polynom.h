@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <memory>
+#include <QLineEdit>
 
 #include "Array.h"
 #include "Complex.h"
@@ -17,7 +18,7 @@ public:
 
 	~Polynom();
 
-	bool Create();
+    bool Create(number t_anCoeff, unsigned t_N, QVBoxLayout *createLayout);
 	
 	bool Clear();
 

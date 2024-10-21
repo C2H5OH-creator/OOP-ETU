@@ -14,16 +14,15 @@ bool Array::Sort(bool ascending) {
                 }
             }
         }
-    }
-    else {
+    } else {
         std::cout << "Массив ещё не инициализирован, либо в нём нет ни одного элемента!" << std::endl;
         return false;
     }
     return true;
 }
 
-bool Array::SetValue(unsigned t_index, number value) {
-    if (t_index > array.size()) {
+bool Array::SetValue(unsigned t_index, double value) {
+    if (t_index >= array.size()) {
         return false;
     }
     array[t_index] = value;
@@ -32,10 +31,9 @@ bool Array::SetValue(unsigned t_index, number value) {
 
 bool Array::ChangeSize(unsigned t_size) {
     if (t_size > array.size()) {
-        array.resize(t_size, Complex(0, 0));
+        array.resize(t_size, 0);
         return true;
-    }
-    else if (t_size < array.size()) {
+    } else if (t_size < array.size()) {
         array.resize(t_size);
         return true;
     }
@@ -44,7 +42,7 @@ bool Array::ChangeSize(unsigned t_size) {
 
 bool Array::Print() {
     std::cout << "[ ";
-    for (int i = 0; i < array.size(); i++) {
+    for (size_t i = 0; i < array.size(); i++) {
         std::cout << array[i];
         if (i != array.size() - 1) {
             std::cout << ", ";
@@ -55,8 +53,8 @@ bool Array::Print() {
 }
 
 number Array::Mean() {
-    number sum(0, 0);
-    for (const number& value : array) {
+    number sum = 0;
+    for (const double& value : array) {
         sum += value;
     }
     return sum / static_cast<double>(array.size());
@@ -68,15 +66,12 @@ number Array::StandardDeviation() {
     }
 
     number mean = Mean();
+    number sum_of_squares = 0;
 
-    double sum_of_squares = 0;
     for (const number& value : array) {
         number diff = value - mean;
-        double magnitude = sqrt(diff.getReal() * diff.getReal() + diff.getImaginary() * diff.getImaginary());
-        sum_of_squares += magnitude * magnitude;
+        sum_of_squares += diff * diff;
     }
 
-    double stddev = sqrt(sum_of_squares / static_cast<double>(array.size()));
-
-    return number(stddev, 0);
+    return sqrt(sum_of_squares / static_cast<double>(array.size()));
 }
