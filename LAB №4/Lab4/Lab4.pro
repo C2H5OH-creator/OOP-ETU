@@ -13,8 +13,11 @@ SOURCES += \
     ../Application/Array.cpp \
     ../Application/Complex.cpp \
     ../Application/Polynom.cpp \
-    main.cpp \
-    mainwindow.cpp
+    Array.cpp \
+    Complex.cpp \
+    Polynom.cpp \
+    interface.cpp \
+    main.cpp
 
 HEADERS += \
     ../Application/Application.h \
@@ -23,7 +26,12 @@ HEADERS += \
     ../Application/Polynom.h \
     ../Application/enums.h \
     ../Application/number.h \
-    mainwindow.h
+    Array.h \
+    Complex.h \
+    Polynom.h \
+    enums.h \
+    interface.h \
+    number.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

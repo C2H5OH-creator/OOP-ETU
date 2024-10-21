@@ -1,5 +1,5 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef INTERFACE_H
+#define INTERFACE_H
 
 #include <QApplication>
 #include <QMainWindow>
@@ -10,13 +10,13 @@
 #include <QLabel>
 #include <QLineEdit>
 
-class MainWindow : public QMainWindow
+class Interface : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    Interface(QWidget *parent = nullptr);
+    ~Interface();
 
 private slots:
     //void onRadioButtonClicked();
@@ -34,4 +34,4 @@ private:
     QWidget *calcPolynomWidget;
     QWidget *printPolynomWidget;
 };
-#endif // MAINWINDOW_H
+#endif // INTERFACE_H

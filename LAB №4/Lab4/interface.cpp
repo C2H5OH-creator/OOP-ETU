@@ -1,6 +1,6 @@
-#include "mainwindow.h"
+#include "interface.h"
 
-MainWindow::MainWindow(QWidget *parent)
+Interface::Interface(QWidget *parent)
     : QMainWindow(parent)
 {
     // Центральный виджет и главный макет
@@ -16,10 +16,10 @@ MainWindow::MainWindow(QWidget *parent)
     auto *printPolynom = new QRadioButton("Вывести полином", this);
 
     // Подключение сигналов
-    connect(createPolynom, &QRadioButton::clicked, this, &MainWindow::OnCreatePolynomClicked);
-    connect(changeValue, &QRadioButton::clicked, this, &MainWindow::OnChangeValueClicked);
-    connect(calcPolynom, &QRadioButton::clicked, this, &MainWindow::OnCalcPolynomClicked);
-    connect(printPolynom, &QRadioButton::clicked, this, &MainWindow::OnPrintPolynomClicked);
+    connect(createPolynom, &QRadioButton::clicked, this, &Interface::OnCreatePolynomClicked);
+    connect(changeValue, &QRadioButton::clicked, this, &Interface::OnChangeValueClicked);
+    connect(calcPolynom, &QRadioButton::clicked, this, &Interface::OnCalcPolynomClicked);
+    connect(printPolynom, &QRadioButton::clicked, this, &Interface::OnPrintPolynomClicked);
 
     // Добавление радиокнопок в левый Layout
     leftLayout->addWidget(createPolynom);
@@ -74,9 +74,9 @@ MainWindow::MainWindow(QWidget *parent)
     setCentralWidget(centralWidget);
 }
 
-MainWindow::~MainWindow() {}
+Interface::~Interface() {}
 
-void MainWindow::OnCreatePolynomClicked(){
+void Interface::OnCreatePolynomClicked(){
     changeValueWidget->hide();
     calcPolynomWidget->hide();
     printPolynomWidget->hide();
@@ -84,7 +84,7 @@ void MainWindow::OnCreatePolynomClicked(){
     createPolynomWidget->show();
 }
 
-void MainWindow::OnChangeValueClicked(){
+void Interface::OnChangeValueClicked(){
     createPolynomWidget->hide();
     calcPolynomWidget->hide();
     printPolynomWidget->hide();
@@ -92,7 +92,7 @@ void MainWindow::OnChangeValueClicked(){
     changeValueWidget->show();
 }
 
-void MainWindow::OnCalcPolynomClicked(){
+void Interface::OnCalcPolynomClicked(){
     createPolynomWidget->hide();
     changeValueWidget->hide();
     printPolynomWidget->hide();
@@ -100,7 +100,7 @@ void MainWindow::OnCalcPolynomClicked(){
     calcPolynomWidget->show();
 }
 
-void MainWindow::OnPrintPolynomClicked(){
+void Interface::OnPrintPolynomClicked(){
     createPolynomWidget->hide();
     changeValueWidget->hide();
     calcPolynomWidget->hide();
