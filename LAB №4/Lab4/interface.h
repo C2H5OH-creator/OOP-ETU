@@ -11,6 +11,9 @@
 #include <QLineEdit>
 #include <QPushButton>
 
+#include "number.h"
+#include "Polynom.h"
+
 class Interface : public QMainWindow
 {
     Q_OBJECT
@@ -25,16 +28,50 @@ private slots:
     void OnChangeValueClicked();
     void OnCalcPolynomClicked();
     void OnPrintPolynomClicked();
-private:
-    QVBoxLayout *leftLayout;
-    QWidget *centralWidget;
+    void onRootCountChanged(const QString &text);
+    void onConfirmCreate();
+    void onClearCreateFields();
+    void onConfirmChangeButton();
 
-    // Виджеты для каждого пункта меню
+private:
+    QWidget *centralWidget;
+    QVBoxLayout *leftLayout;
+    QVBoxLayout *createLayout;
+
+    QLineEdit *rootCountInput;
+
+    QLineEdit *aNInputReal;
+    QLineEdit *aNInputImaginary;
+
+    QLineEdit* calcValueReal;
+    QLineEdit* calcValueImaginary;
+
+    QLineEdit *changeInput;
+    QLineEdit *calcInput;
+
+    QLineEdit *changeInputAnReal;
+    QLineEdit *changeInputAnImaginary;
+    QLineEdit *changeInputIndex;
+    QLineEdit *changeInputRootReal;
+    QLineEdit *changeInputRootImaginary;
+
+
+    QRadioButton* changeAnButton;
+    QRadioButton* changeRootButton;
+
+    QLabel* rootInputLabel;
+
+    QVector<QPair<QLineEdit*, QLineEdit*>> rootInputs;
+    QVector<QHBoxLayout*> rootInputLayouts;
+
     QWidget *createPolynomWidget;
     QWidget *changeValueWidget;
     QWidget *calcPolynomWidget;
     QWidget *printPolynomWidget;
 
-    std::vector<QLineEdit> inputFields;
+    QLabel *canonicalFormLabel;
+    QLabel *nonCanonicalFormLabel;
+
+    Polynom polynom;
 };
 #endif // INTERFACE_H

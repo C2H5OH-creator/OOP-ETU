@@ -1,3 +1,3 @@
 #pragma once
 #include "Complex.h"
-typedef double number;
+typedef Complex number;

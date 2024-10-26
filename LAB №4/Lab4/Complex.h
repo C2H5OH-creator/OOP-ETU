@@ -4,6 +4,8 @@
 #include <iostream>
 #include <string>
 
+#include <QString>
+
 class Complex {
 public:
     // Конструкторы
@@ -117,13 +119,12 @@ public:
         return inputStream;
     }
 
-    std::string GetComplexString() const {
+    QString GetComplexString() const {
         if (imaginary >= 0)
-            return std::to_string(real) + " + i" + std::to_string(imaginary);
+            return QString::number(real) + " + i" + QString::number(imaginary);
         else
-            return std::to_string(real) + " - i" + std::to_string(imaginary);
+            return QString::number(real) + " - i" + QString::number(std::abs(imaginary));
     }
-
 
 private:
     double real;
