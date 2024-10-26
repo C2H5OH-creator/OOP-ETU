@@ -8,6 +8,8 @@
 Interface::Interface(QWidget *parent)
     : QMainWindow(parent)
 {
+    //=============================================//
+
     // Центральный виджет и главный макет
     centralWidget = new QWidget(this);
     QHBoxLayout *mainLayout = new QHBoxLayout(centralWidget);
@@ -25,6 +27,8 @@ Interface::Interface(QWidget *parent)
     connect(changeValue, &QRadioButton::clicked, this, &Interface::OnChangeValueClicked);
     connect(calcPolynom, &QRadioButton::clicked, this, &Interface::OnCalcPolynomClicked);
     connect(printPolynom, &QRadioButton::clicked, this, &Interface::OnPrintPolynomClicked);
+
+    //=============================================//
 
     // Добавление радиокнопок в левый Layout
     leftLayout->addWidget(createPolynom);
@@ -72,6 +76,8 @@ Interface::Interface(QWidget *parent)
     auto clearCreateButton = new QPushButton("Очистить", this);
     connect(clearCreateButton, &QPushButton::clicked, this, &Interface::onClearCreateFields);
     createLayout->addWidget(clearCreateButton);
+
+    //=============================================//
 
     // Виджет для изменения значения
     changeValueWidget = new QWidget(this);
@@ -135,6 +141,9 @@ Interface::Interface(QWidget *parent)
     changeInputIndex->hide();
     changeInputRootReal->hide();
     changeInputRootImaginary->hide();
+
+    //=============================================//
+
     // Виджет для вычисления значения полинома
     calcPolynomWidget = new QWidget(this);
     QVBoxLayout *calcLayout = new QVBoxLayout(calcPolynomWidget);
@@ -159,6 +168,8 @@ Interface::Interface(QWidget *parent)
         QMessageBox::information(this, "Результат", QString("Значение полинома: %1").arg(result.GetComplexString()));
     });
     calcLayout->addWidget(confirmCalcButton);
+
+    //=============================================//
 
     // Виджет для вывода полинома
     printPolynomWidget = new QWidget(this);
@@ -312,8 +323,8 @@ void Interface::onConfirmChangeButton(){
     else{
         number value = Complex(changeInputAnReal->text().toDouble(),changeInputAnImaginary->text().toDouble());
         if(polynom.SetValue(1,0,value)){
-        QMessageBox::information(this, "Подтверждено", "An успешно изменён!");
-    }
+            QMessageBox::information(this, "Подтверждено", "An успешно изменён!");
+        }
 
     }
 }
