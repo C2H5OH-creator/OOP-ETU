@@ -1,8 +1,8 @@
 #include "udpcommunicator.h"
 
-UDPCommunicator::UDPCommunicator(QObject *parent) : QObject(parent) {
+UDPCommunicator::UDPCommunicator(QObject *parent, int t_port) : QObject(parent) {
     udpSocket = new QUdpSocket(this);
-    udpSocket->bind(6004);
+    udpSocket->bind(t_port);
 
     connect(udpSocket, &QUdpSocket::readyRead, this, &UDPCommunicator::getData);
 }
@@ -40,5 +40,55 @@ void UDPCommunicator::sendData(const QHostAddress &sender, unsigned short sender
 
     // Отправка JSON-ответа обратно отправителю
     udpSocket->writeDatagram(jsonData, sender, senderPort);
-    qDebug() << "Sent response:" << jsonData;
+    qDebug() << "Отправлено сообщение:" << jsonData;
 };
+
+
+QString UDPCommunicator::createJsonMessage(const QString& sender, int action,
+                                           const QList<QVariant>& roots,
+                                           const QString& serverResponse,
+                                           double evaluateReal, double evaluateImag,
+                                           const QString& canonForm, const QString& nonCanonForm) {
+    QJsonObject jsonObject;
+
+    // Добавление sender
+    jsonObject["sender"] = sender;
+
+    // Добавление action
+    jsonObject["action"] = action;
+
+    // Формирование массива roots
+    QJsonArray rootsArray;
+    for (const auto& root : roots) {
+        if (root.canConvert<int>()) {
+            // Добавление целого числа
+            rootsArray.append(root.toInt());
+        } else if (root.canConvert<QVariantMap>()) {
+            // Добавление комплексного числа
+            QVariantMap complexRoot = root.toMap();
+            QJsonObject complexObj;
+            complexObj["real"] = complexRoot.value("real").toDouble();
+            complexObj["imag"] = complexRoot.value("imag").toDouble();
+            rootsArray.append(complexObj);
+        }
+    }
+    jsonObject["roots"] = rootsArray;
+
+    // Добавление server_response
+    jsonObject["server_response"] = serverResponse;
+
+    // Добавление evaluate_value
+    QJsonObject evaluateValue;
+    evaluateValue["real"] = evaluateReal;
+    evaluateValue["imag"] = evaluateImag;
+    jsonObject["evaluate_value"] = evaluateValue;
+
+    // Добавление canon_form и non_canon_form (новые строки)
+    jsonObject["canon_form"] = canonForm;
+    jsonObject["non_canon_form"] = nonCanonForm;
+
+    // Создание QJsonDocument и его преобразование в строку
+    QJsonDocument jsonDoc(jsonObject);
+    return jsonDoc.toJson(QJsonDocument::Indented);
+}
+

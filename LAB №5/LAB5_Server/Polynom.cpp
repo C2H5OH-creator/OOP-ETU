@@ -151,7 +151,8 @@ QString Polynom::PrintCanonicalForm() {
     for (int i = canonicalPoly.size() - 1; i >= 0; --i) {
         number coeff = canonicalPoly[i];
 
-        if (coeff == Complex(0, 0)) continue;
+        // Проверяем, что коэффициент не является нулевым
+        if (coeff.getReal() == 0 && coeff.getImaginary() == 0) continue;
 
         // Добавляем знак перед членом (если это не первый член)
         if (!firstTerm) {
@@ -162,25 +163,29 @@ QString Polynom::PrintCanonicalForm() {
             }
         }
 
-        // Обрабатываем модуль коэффициента (для старших степеней коэффициент 1 или -1 опускаем)
-        if (i > 0) {
-            double realPart = coeff.getReal();
-            double imaginaryPart = coeff.getImaginary();
+        double realPart = coeff.getReal();
+        double imaginaryPart = coeff.getImaginary();
 
+        // Обрабатываем случай, когда реальная часть = 0, но мнимая часть ненулевая
+        if (realPart == 0 && imaginaryPart != 0) {
+            output += (imaginaryPart >= 0 ? "+" : "") + QString::number(imaginaryPart) + "i";
+        } else {
+            // Обрабатываем модуль коэффициента для реальных частей
             if (std::abs(realPart) != 1 || imaginaryPart != 0) {
-                output += "(" + QString::number(realPart) + (imaginaryPart >= 0 ? "+" : "") +
-                          QString::number(imaginaryPart) + "i)";
+                output += QString::number(realPart) + (imaginaryPart >= 0 ? "+" : "") +
+                          QString::number(imaginaryPart) + "i";
+            } else {
+                output += (realPart == 0 ? "" : QString::number(realPart)) + (imaginaryPart >= 0 ? "+" : "") +
+                          QString::number(imaginaryPart) + "i";
             }
+        }
 
-            // Добавляем x^степень
+        // Добавляем x^степень
+        if (i > 0) {
             output += "x";
             if (i > 1) {
                 output += ToSuperscript(i);
             }
-        } else {
-            // Добавляем свободный член
-            output += QString::number(coeff.getReal()) + (coeff.getImaginary() >= 0 ? "+" : "") +
-                      QString::number(coeff.getImaginary()) + "i";
         }
 
         firstTerm = false; // После первого члена переключаем флаг

@@ -23,14 +23,14 @@ enum ID {
     CHANGE_POLYNOM_COEFFS = 1,
     CALCULATE_VALUE_POLYNOMIAL_AT_POINT = 2,
     PRINT_POLYNOM = 3,
-    DEFAULT_CANON_FORM = 4,
-    DEFAULT_NON_CANON_FORM = 5,
+    GET_POLYNOM_FORMS = 4,
     CHANGE_AN = 6,
     CHANGE_ROOT = 7,
 
 };
 
 enum network {
-    port = 6004
+    client_port = 6004,
+    server_port = 6005,
 
 };

@@ -8,6 +8,7 @@
 Interface::Interface(QWidget *parent)
     : QMainWindow(parent)
 {
+    communicator = new UDPCommunicator(this, client_port);
     connect(communicator, &UDPCommunicator::messageReceived, this, &Interface::handleMessage);
 
     //=============================================//
@@ -165,30 +166,25 @@ Interface::Interface(QWidget *parent)
 
     QPushButton *confirmCalcButton = new QPushButton("Подтвердить", this);
     connect(confirmCalcButton, &QPushButton::clicked, [this]() {
-        //number result = polynom.evaluateAtPoint(value);
+        // Данные для создания JSON
+        QString sender = "Client";
+        int action = CALCULATE_VALUE_POLYNOMIAL_AT_POINT;
 
-        // Создаем JSON объект
-        QJsonObject jsonObject;
-        jsonObject["sender"] = "Client";  // Укажите отправителя
-        jsonObject["action"] = CALCULATE_VALUE_POLYNOMIAL_AT_POINT;
-        jsonObject["roots"] = "[]";
-        QJsonArray value;
+        // Пустой массив корней для текущего примера
+        QList<QVariant> roots;
 
-        QJsonObject rootObject;
-        rootObject["real"] = calcValueReal->text().toDouble();
-        rootObject["imag"] = std::abs(calcValueImaginary->text().toDouble());
-        value.append(rootObject);
+        // Значения для поля evaluate_value
+        double evaluateReal = calcValueReal->text().toDouble();
+        double evaluateImaginary = std::abs(calcValueImaginary->text().toDouble());
 
-        jsonObject["server_response"] = "";
-        jsonObject["evaluate_value"] = "";
+        // Пустой ответ сервера
+        QString serverResponse = "";
 
-        // Преобразуем объект в JSON строку
-        QJsonDocument jsonDoc(jsonObject);
-        QString jsonString = jsonDoc.toJson(QJsonDocument::Compact);
+        // Создание JSON строки с использованием новой функции
+        QString jsonString = communicator->createJsonMessage(sender, action, roots, serverResponse, evaluateReal, evaluateImaginary,"","");
 
-        // Здесь вы можете отправить jsonString через ваш класс Communicator
-        communicator->sendData(QHostAddress("0.0.0.0"),6004,jsonString);
-
+        // Отправка JSON строки
+        communicator->sendData(QHostAddress("0.0.0.0"), server_port, jsonString);
     });
 
     calcLayout->addWidget(confirmCalcButton);
@@ -257,19 +253,11 @@ void Interface::OnPrintPolynomClicked() {
 
     QJsonObject jsonObject1;
     jsonObject1["sender"] = "Client";
-    jsonObject1["action"] = DEFAULT_CANON_FORM;
+    jsonObject1["action"] = GET_POLYNOM_FORMS;
     QJsonDocument jsonDoc1(jsonObject1);
-    QString jsonString1 = jsonDoc1.toJson(QJsonDocument::Compact);
+    QString jsonCanonForm = jsonDoc1.toJson(QJsonDocument::Compact);
 
-    communicator->sendData(QHostAddress("0.0.0.0"), port, jsonString1);
-
-    QJsonObject jsonObject;
-    jsonObject["sender"] = "Client";
-    jsonObject["action"] = DEFAULT_NON_CANON_FORM;
-    QJsonDocument jsonDoc(jsonObject);
-    QString jsonString = jsonDoc.toJson(QJsonDocument::Compact);
-
-    communicator->sendData(QHostAddress("0.0.0.0"), port, jsonString);
+    communicator->sendData(QHostAddress("0.0.0.0"), server_port, jsonCanonForm);
 }
 
 void Interface::onRootCountChanged(const QString &text) {
@@ -311,38 +299,37 @@ void Interface::onRootCountChanged(const QString &text) {
 }
 
 void Interface::onConfirmCreate() {
-    // Создаем JSON объект
-    QJsonObject jsonObject;
-    jsonObject["sender"] = "Client";  // Укажите отправителя
-    jsonObject["action"] = CREATE_POLYNOM;          // Задайте действие, например, 1 для создания полинома
+    // Данные для создания JSON
+    QString sender = "Client";
+    int action = CREATE_POLYNOM;
 
-    // Создаем массив для корней
-    QJsonArray rootsArray;
+    // Собираем массив корней
+    QList<QVariant> roots;
 
-    // Добавляем коэффициент ан в массив корней
-    QJsonObject anObject;
-    anObject["real"] = aNInputReal->text().toDouble(); // Предполагается, что есть метод real()
-    anObject["imag"] = aNInputImaginary->text().toDouble();  // Предполагается, что есть метод imag()
-    rootsArray.append(anObject);
+    // Добавляем коэффициент an
+    QVariantMap anObject;
+    anObject["real"] = aNInputReal->text().toDouble();
+    anObject["imag"] = aNInputImaginary->text().toDouble();
+    roots.append(anObject);
 
-    // Добавляем корни в массив
+    // Добавляем корни
     for (const auto &rootPair : rootInputs) {
-        QJsonObject rootObject;
+        QVariantMap rootObject;
         rootObject["real"] = rootPair.first->text().toDouble();
         rootObject["imag"] = rootPair.second->text().toDouble();
-        rootsArray.append(rootObject);
+        roots.append(rootObject);
     }
 
-    jsonObject["roots"] = rootsArray;
-    jsonObject["server_response"] = "";
-    jsonObject["evaluate_value"] = "";
+    // Пустой ответ сервера и значение evaluate_value
+    QString serverResponse = "";
+    double evaluateReal = 0.0;
+    double evaluateImaginary = 0.0;
 
-    // Преобразуем объект в JSON строку
-    QJsonDocument jsonDoc(jsonObject);
-    QString jsonString = jsonDoc.toJson(QJsonDocument::Compact);
+    // Создание JSON строки с использованием новой функции
+    QString jsonString = communicator->createJsonMessage(sender, action, roots, serverResponse, evaluateReal, evaluateImaginary,"","");
 
-    // Здесь вы можете отправить jsonString через ваш класс Communicator
-    communicator->sendData(QHostAddress("0.0.0.0"),6004,jsonString);
+    // Отправка JSON строки через ваш класс Communicator
+    communicator->sendData(QHostAddress("0.0.0.0"), server_port, jsonString);
 
     QMessageBox::information(this, "Подтверждено", "Полином успешно создан!");
 }
@@ -369,69 +356,103 @@ void Interface::onClearCreateFields() {
 
 
 void Interface::onConfirmChangeButton(){
-    QJsonObject jsonObject;
-    jsonObject["sender"] = "Client";
-
     if (changeRootButton->isChecked()) {
-        jsonObject["action"] = CHANGE_ROOT;
-        int index = changeInputIndex->text().toUInt();  // Индекс корня
+        // Собираем массив
+        QList<QVariant> roots;
+        QVariantMap an;
+        an["real"] = 0;
+        an["imag"] = 0;
+        roots.append(an);
 
-        QJsonObject evaluateValueObject;
-        evaluateValueObject["real"] = changeInputRootReal->text().toDouble();
-        evaluateValueObject["imag"] = changeInputRootImaginary->text().toDouble();
+        QVariantMap index;
+        index["real"] = changeInputIndex->text().toUInt();
+        index["imag"] = 0;
+        roots.append(index);
 
-        jsonObject["evaluate_value"] = evaluateValueObject;
-        jsonObject["root_index"] = index;
+        QVariantMap rootObject;
+        rootObject["real"] = changeInputRootReal->text().toDouble();
+        rootObject["imag"] = changeInputRootImaginary->text().toDouble();
+        roots.append(rootObject);
 
-            QMessageBox::information(this, "Подтверждено", "Корень успешно изменён!");
+        QString change_root = communicator->createJsonMessage("client",CHANGE_ROOT,roots,"",0,0,"","");
+        communicator->sendData(QHostAddress("0.0.0.0"), server_port, change_root);
+
+        QMessageBox::information(this, "Подтверждено", "Корень успешно изменён!");
     } else {
-        jsonObject["action"] = CHANGE_AN;
-        QJsonObject evaluateValueObject;
-        evaluateValueObject["real"] = changeInputAnReal->text().toDouble();   // Записываем действительную часть
-        evaluateValueObject["imag"] = changeInputAnImaginary->text().toDouble();   // Записываем мнимую часть
-        jsonObject["evaluate_value"] = evaluateValueObject;
+        QList<QVariant> roots;
+
+        // Добавляем коэффициент an
+        QVariantMap anObject;
+        anObject["real"] = changeInputAnReal->text().toDouble();
+        anObject["imag"] = changeInputAnImaginary->text().toDouble();
+        roots.append(anObject);
+
+        QString change_root = communicator->createJsonMessage("client",CHANGE_AN,roots,"",0,0,"","");
+        communicator->sendData(QHostAddress("0.0.0.0"), server_port, change_root);
 
         QMessageBox::information(this, "Подтверждено", "An успешно изменён!");
     }
-
-    // Создание JSON документа
-    QJsonDocument jsonDoc(jsonObject);
-    QString jsonString = jsonDoc.toJson(QJsonDocument::Compact);
-    communicator->sendData(QHostAddress("0.0.0.0"), port,jsonString);
-
 }
 
 void Interface::handleMessage(const QString &message){
+    qDebug() << "Клиент получил сообщение: " + message;
+
+    QList<QVariant> emptyList;
     // Разбор JSON строки
     QJsonDocument jsonDoc = QJsonDocument::fromJson(message.toUtf8());
 
-    // Проверяем, валиден ли JSON
+    // Проверка валидности JSON
     if (jsonDoc.isNull() || !jsonDoc.isObject()) {
-        QMessageBox::warning(this, "Ошибка", "Получено некорректное сообщение.");
+        qDebug() << "Ошибка: Получено некорректное сообщение.";
         return;
     }
 
     QJsonObject jsonObject = jsonDoc.object();
 
-    // Извлечение значений
-    QString sender = jsonObject.value("sender").toString();
-    int action = jsonObject.value("action").toInt();
-    QString serverResponse = jsonObject.value("server_response").toString();
+    // Извлечение значения response (которое является строкой, содержащей JSON)
+    QString responseString = jsonObject.value("response").toString();
+    qDebug() << "Ответ из вложенного JSON: " << responseString;
+
+    // Теперь нужно распарсить строку response как JSON
+    QJsonDocument responseDoc = QJsonDocument::fromJson(responseString.toUtf8());
+
+    // Проверка валидности вложенного JSON
+    if (responseDoc.isNull() || !responseDoc.isObject()) {
+        qDebug() << "Ошибка: Вложенный JSON некорректен.";
+        return;
+    }
+
+    QJsonObject responseObject = responseDoc.object();
+
+    // Извлечение значений из вложенного JSON
+    int action = responseObject.value("action").toInt();
+    QString sender = responseObject.value("sender").toString();
+    qDebug() << "Сервер будет выполнять такое действие: " << action;
+    qDebug() << "Отправитель: " << sender;
+
+    QString serverResponse = responseObject.value("server_response").toString();
+    qDebug() << "Ответ сервера: " << serverResponse;
 
     // Обработка action
     switch (action) {
     case CREATE_POLYNOM:  // Например, для действия создания полинома
-        canonicalFormLabel->setText(jsonObject.value("canon_form").toString());
-        nonCanonicalFormLabel->setText(jsonObject.value("non_canon_form").toString());
+        canonicalFormLabel->setText(responseObject.value("canon_form").toString());
+        nonCanonicalFormLabel->setText(responseObject.value("non_canon_form").toString());
         break;
-    case DEFAULT_CANON_FORM:  // Например, для действия создания полинома
-       canonicalFormLabel->setText(serverResponse);
-        break;
-    case DEFAULT_NON_CANON_FORM:  // Например, для действия создания полинома
-        nonCanonicalFormLabel->setText(serverResponse);
+    case GET_POLYNOM_FORMS:  // Например, для действия создания полинома
+        canonicalFormLabel->setText(responseObject.value("canon_form").toString());
+        nonCanonicalFormLabel->setText(responseObject.value("non_canon_form").toString());
         break;
     case CALCULATE_VALUE_POLYNOMIAL_AT_POINT:  // Например, для действия создания полинома
         QMessageBox::information(this, "Результат", QString("Значение полинома: %1").arg(serverResponse));
+        break;
+    case CHANGE_AN:  // Например, для действия создания полинома
+        canonicalFormLabel->setText(responseObject.value("canon_form").toString());
+        nonCanonicalFormLabel->setText(responseObject.value("non_canon_form").toString());
+        break;
+    case CHANGE_ROOT:  // Например, для действия создания полинома
+        canonicalFormLabel->setText(responseObject.value("canon_form").toString());
+        nonCanonicalFormLabel->setText(responseObject.value("non_canon_form").toString());
         break;
     default:
         QMessageBox::warning(this, "Предупреждение", "Неизвестное действие.");
