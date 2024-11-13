@@ -6,42 +6,44 @@
 #include <QVector>
 
 #include "Array.h"
+#include "Array.cpp"
 #include "Complex.h"
 #include "number.h"
 
+template <typename T>
 class Polynom {
 public:
 	Polynom();
 	
-	Polynom(number constant);
+    Polynom(T constant);
 	
-	Polynom(number t_an,unsigned N);
+    Polynom(T t_an,unsigned N);
 
 	~Polynom();
 
-    bool Create(number t_anCoeff, unsigned t_N, const QVector<number>& t_roots);
+    bool Create(T t_anCoeff, unsigned t_N, const QVector<T>& t_roots);
 	
 	bool Clear();
 
-    bool SetValue(bool t_type, unsigned t_index, number t_value);
+    bool SetValue(bool t_type, unsigned t_index, T t_value);
 
-	std::vector<number> multiplyPolynom(const std::vector<number>& poly, number root);
+    std::vector<T> multiplyPolynom(const std::vector<T>& poly, T root);
 
 	// Функция для преобразования полинома из множителей в каноническую форму
-	std::vector<number> expandPolynomial(number a, const std::vector<number>& roots);
+    std::vector<T> expandPolynomial(T a, const std::vector<T>& roots);
 
-	number evaluateAtPoint(number x);
+    T evaluateAtPoint(T x);
 
     QString PrintCanonicalForm();
 
     QString PrintNonCanonicalForm();
 
-	Array* GetRoots() { return roots.get(); }
-	Array* GetCoeffs() { return coefficient.get(); }
+    Array<T>* GetRoots() { return roots.get(); }
+    Array<T>* GetCoeffs() { return coefficient.get(); }
 
 private:
-	std::unique_ptr<Array> roots;
-	std::unique_ptr<Array> coefficient;
-	number anCoeff;
+    std::unique_ptr<Array<T>> roots;
+    std::unique_ptr<Array<T>> coefficient;
+    T anCoeff;
 
 };

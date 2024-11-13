@@ -9,8 +9,10 @@
 #include <QDebug>
 #include <QUdpSocket>
 
+
 #include "udpcommunicator.h"
 #include "Polynom.h"
+#include "Polynom.cpp"
 #include "Complex.h"
 #include "enums.h"
 
@@ -23,7 +25,8 @@ public:
 public slots:
     void handleMessage(const QString &message);
 private:
-    Polynom* polynom;
+    Polynom<number>* complexPolynom;
+    Polynom<double>* doublePolynom;
     UDPCommunicator* communicator;
 };
 

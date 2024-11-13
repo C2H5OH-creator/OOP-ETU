@@ -5,25 +5,75 @@
 #include <QMessageBox>
 
 
+
 Interface::Interface(QWidget *parent)
     : QMainWindow(parent)
 {
     communicator = new UDPCommunicator(this, client_port);
     connect(communicator, &UDPCommunicator::messageReceived, this, &Interface::handleMessage);
 
-    //=============================================//
-
     // Центральный виджет и главный макет
     centralWidget = new QWidget(this);
-    QHBoxLayout *mainLayout = new QHBoxLayout(centralWidget);
+    mainLayout = new QHBoxLayout(centralWidget);
 
-    // Левый Layout для радиокнопок
+    // Создаём левый и правый макеты
+    createLeftLayout();
+    createRightLayout();
+
+    // Создание групп боксов для каждого макета
+    QGroupBox *leftGroupBox = new QGroupBox("Настройки");
+    leftGroupBox->setLayout(leftLayout);
+
+    QGroupBox *rightGroupBox = new QGroupBox("Параметры полинома");
+    rightGroupBox->setLayout(rightLayout);
+
+    // Разделитель между левым и правым макетами
+    QFrame *line = new QFrame();
+    line->setFrameShape(QFrame::VLine);
+    line->setFrameShadow(QFrame::Sunken);
+
+    // Добавление групп боксов и разделителя в основной макет
+    mainLayout->addWidget(leftGroupBox);
+    mainLayout->addWidget(line);  // Добавляем вертикальный разделитель
+    mainLayout->addWidget(rightGroupBox);
+
+    // Установка центрального виджета и основного макета
+    setCentralWidget(centralWidget);
+}
+
+
+void Interface::createLeftLayout()
+{
     leftLayout = new QVBoxLayout();
+    leftLayout->setContentsMargins(10, 10, 10, 10);
+    leftLayout->setSpacing(10);
 
-    auto createPolynom = new QRadioButton("Ввести корни и An полинома", this);
-    auto changeValue = new QRadioButton("Изменить An или любой другой корень", this);
-    auto calcPolynom = new QRadioButton("Вычислить значение полинома в точке", this);
-    auto printPolynom = new QRadioButton("Вывести полином", this);
+    // Группа выбора множества
+    QGroupBox *numberSetGroup = new QGroupBox("На каком множестве определён полином?");
+    QHBoxLayout *numberSetLayout = new QHBoxLayout();
+    complexRadio = new QRadioButton("Комплексные числа");
+    complexRadio->setChecked(true); // По умолчанию
+    realRadio = new QRadioButton("Вещественные числа");
+
+    numberSetLayout->addWidget(complexRadio);
+    numberSetLayout->addWidget(realRadio);
+    numberSetGroup->setLayout(numberSetLayout);
+
+    leftLayout->addWidget(numberSetGroup);
+
+    // Разделитель
+    QFrame *line = new QFrame();
+    line->setFrameShape(QFrame::HLine);
+    line->setFrameShadow(QFrame::Sunken);
+    leftLayout->addWidget(line);
+
+    // Группа выбора действия
+    QGroupBox *actionGroup = new QGroupBox("Действия с полиномом");
+    QVBoxLayout *actionLayout = new QVBoxLayout();
+    auto createPolynom = new QRadioButton("Ввести корни и An полинома");
+    auto changeValue = new QRadioButton("Изменить An или любой другой корень");
+    auto calcPolynom = new QRadioButton("Вычислить значение полинома в точке");
+    auto printPolynom = new QRadioButton("Вывести полином");
 
     // Подключение сигналов
     connect(createPolynom, &QRadioButton::clicked, this, &Interface::OnCreatePolynomClicked);
@@ -31,17 +81,21 @@ Interface::Interface(QWidget *parent)
     connect(calcPolynom, &QRadioButton::clicked, this, &Interface::OnCalcPolynomClicked);
     connect(printPolynom, &QRadioButton::clicked, this, &Interface::OnPrintPolynomClicked);
 
-    //=============================================//
+    // Добавление радиокнопок в макет группы
+    actionLayout->addWidget(createPolynom);
+    actionLayout->addWidget(changeValue);
+    actionLayout->addWidget(calcPolynom);
+    actionLayout->addWidget(printPolynom);
+    actionGroup->setLayout(actionLayout);
 
-    // Добавление радиокнопок в левый Layout
-    leftLayout->addWidget(createPolynom);
-    leftLayout->addWidget(changeValue);
-    leftLayout->addWidget(calcPolynom);
-    leftLayout->addWidget(printPolynom);
+    leftLayout->addWidget(actionGroup);
+}
 
-    // Правый Layout для отображения элементов в зависимости от выбора
-    QVBoxLayout *rightLayout = new QVBoxLayout();
 
+// Функция создания правого Layout
+void Interface::createRightLayout()
+{
+    rightLayout = new QVBoxLayout();
     // Виджет для создания полинома
     createPolynomWidget = new QWidget(this);
     createLayout = new QVBoxLayout(createPolynomWidget);
@@ -181,7 +235,7 @@ Interface::Interface(QWidget *parent)
         QString serverResponse = "";
 
         // Создание JSON строки с использованием новой функции
-        QString jsonString = communicator->createJsonMessage(sender, action, roots, serverResponse, evaluateReal, evaluateImaginary,"","");
+        QString jsonString = communicator->createJsonMessage(0,sender, action, roots, serverResponse, evaluateReal, evaluateImaginary,"","");
 
         // Отправка JSON строки
         communicator->sendData(QHostAddress("0.0.0.0"), server_port, jsonString);
@@ -214,12 +268,6 @@ Interface::Interface(QWidget *parent)
     rightLayout->addWidget(changeValueWidget);
     rightLayout->addWidget(calcPolynomWidget);
     rightLayout->addWidget(printPolynomWidget);
-
-    // Добавление левых и правых Layout в главный
-    mainLayout->addLayout(leftLayout);
-    mainLayout->addLayout(rightLayout);
-
-    setCentralWidget(centralWidget);
 }
 
 Interface::~Interface() {}
@@ -326,7 +374,7 @@ void Interface::onConfirmCreate() {
     double evaluateImaginary = 0.0;
 
     // Создание JSON строки с использованием новой функции
-    QString jsonString = communicator->createJsonMessage(sender, action, roots, serverResponse, evaluateReal, evaluateImaginary,"","");
+    QString jsonString = communicator->createJsonMessage(0,sender, action, roots, serverResponse, evaluateReal, evaluateImaginary,"","");
 
     // Отправка JSON строки через ваш класс Communicator
     communicator->sendData(QHostAddress("0.0.0.0"), server_port, jsonString);
@@ -374,7 +422,7 @@ void Interface::onConfirmChangeButton(){
         rootObject["imag"] = changeInputRootImaginary->text().toDouble();
         roots.append(rootObject);
 
-        QString change_root = communicator->createJsonMessage("client",CHANGE_ROOT,roots,"",0,0,"","");
+        QString change_root = communicator->createJsonMessage(0,"client",CHANGE_ROOT,roots,"",0,0,"","");
         communicator->sendData(QHostAddress("0.0.0.0"), server_port, change_root);
 
         QMessageBox::information(this, "Подтверждено", "Корень успешно изменён!");
@@ -387,7 +435,7 @@ void Interface::onConfirmChangeButton(){
         anObject["imag"] = changeInputAnImaginary->text().toDouble();
         roots.append(anObject);
 
-        QString change_root = communicator->createJsonMessage("client",CHANGE_AN,roots,"",0,0,"","");
+        QString change_root = communicator->createJsonMessage(0,"client",CHANGE_AN,roots,"",0,0,"","");
         communicator->sendData(QHostAddress("0.0.0.0"), server_port, change_root);
 
         QMessageBox::information(this, "Подтверждено", "An успешно изменён!");

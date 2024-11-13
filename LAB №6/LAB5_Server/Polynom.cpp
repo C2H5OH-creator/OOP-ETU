@@ -1,90 +1,128 @@
 #include "Polynom.h"
 
-Polynom::Polynom() {
-    roots = std::make_unique<Array>();
-    coefficient = std::make_unique<Array>();
-    roots->GetArray().push_back(Complex(1, 0));
-    coefficient->GetArray().push_back(Complex(1, 0));
-};
+template<typename T>
+Polynom<T>::Polynom() {
+    roots = std::make_unique<Array<T>>();
+    coefficient = std::make_unique<Array<T>>();
 
-Polynom::Polynom(number constant) {
+    if constexpr (std::is_same<T, Complex>::value) {
+        roots->GetArray().push_back(Complex(1, 0));
+        coefficient->GetArray().push_back(Complex(1, 0));
+    } else {
+        roots->GetArray().push_back(1);
+        coefficient->GetArray().push_back(1);
+    }
+}
+
+template<typename T>
+Polynom<T>::Polynom(T constant) {
+    roots = std::make_unique<Array<T>>();
+    coefficient = std::make_unique<Array<T>>();
     roots->GetArray().push_back(constant);
-    coefficient->GetArray().push_back(Complex(1, 0));
-};
 
-Polynom::Polynom(number t_an, unsigned N) {
+    if constexpr (std::is_same<T, Complex>::value) {
+        coefficient->GetArray().push_back(Complex(1, 0));
+    } else {
+        coefficient->GetArray().push_back(1);
+    }
+}
+
+template<typename T>
+Polynom<T>::Polynom(T t_an, unsigned N) {
+    roots = std::make_unique<Array<T>>();
+    coefficient = std::make_unique<Array<T>>();
     for (unsigned i = 0; i < N; i++) {
-        number root;
+        T root;
         std::cin >> root;
         roots->GetArray().push_back(root);
     }
 }
 
-Polynom::~Polynom() {};
+template<typename T>
+Polynom<T>::~Polynom() { }
 
-bool Polynom::Create(number t_anCoeff, unsigned t_N, const QVector<number>& t_roots) {
+template<typename T>
+bool Polynom<T>::Create(T t_anCoeff, unsigned t_N, const QVector<T>& t_roots) {
     Clear();
     anCoeff = t_anCoeff;
     for (unsigned i = 0; i < t_N; i++) {
         roots->GetArray().push_back(t_roots[i]);
     }
 
-    std::cout << "Всего корней: " << roots->GetArray().size() << std::endl;  // Проверка размера массива
-
+    std::cout << "Всего корней: " << roots->GetArray().size() << std::endl;
     return true;
 }
 
-bool Polynom::Clear() {
+template<typename T>
+bool Polynom<T>::Clear() {
     roots->GetArray().clear();
     coefficient->GetArray().clear();
-    anCoeff = Complex(1, 0);
+
+    if constexpr (std::is_same<T, Complex>::value) {
+        anCoeff = Complex(1, 0);
+    } else {
+        anCoeff = 1;  // Для обычных чисел, например double или int
+    }
 
     return true;
 }
 
-
-bool Polynom::SetValue(bool t_type, unsigned t_index, number t_value) {
+template<typename T>
+bool Polynom<T>::SetValue(bool t_type, unsigned t_index, T t_value) {
     switch (t_type) {
     case 0:
         roots->GetArray()[t_index] = t_value;
         return true;
-        break;
     case 1:
         anCoeff = t_value;
         return true;
-        break;
+    default:
+        return false;
     }
-    return false;
 }
 
-std::vector<number> Polynom::multiplyPolynom(const std::vector<number>& poly, number root) {
-    std::vector<number> result(poly.size() + 1, Complex(0, 0)); // Создаем новый полином с на один член больше
+template<typename T>
+std::vector<T> Polynom<T>::multiplyPolynom(const std::vector<T>& poly, T root) {
+    if constexpr (std::is_same<T, Complex>::value) {
+        std::vector<T> result(poly.size() + 1, Complex(0,0));
+        // Выполняем умножение
+        for (size_t i = 0; i < poly.size(); ++i) {
+            result[i] += poly[i];
+            result[i + 1] -= poly[i] * root;
+        }
 
-    // Выполняем умножение
-    for (size_t i = 0; i < poly.size(); ++i) {
-        result[i] += poly[i];
-        result[i + 1] -= poly[i] * root;
+        return result;
+    }else{
+        std::vector<T> result(poly.size() + 1, 0);
+        // Выполняем умножение
+        for (size_t i = 0; i < poly.size(); ++i) {
+            result[i] += poly[i];
+            result[i + 1] -= poly[i] * root;
+        }
+
+        return result;
     }
 
-    return result;
+
 }
 
-// Функция для преобразования полинома из множителей в каноническую форму
-std::vector<number> Polynom::expandPolynomial(number a, const std::vector<number>& roots) {
-    std::vector<number> poly = { a };
+template<typename T>
+std::vector<T> Polynom<T>::expandPolynomial(T a, const std::vector<T>& roots) {
+    std::vector<T> poly = { a };
 
     // Последовательно умножаем полином на (x - r_i)
-    for (number root : roots) {
+    for (T root : roots) {
         poly = multiplyPolynom(poly, root);
     }
 
     return poly;
 }
 
-number Polynom::evaluateAtPoint(number x) {
-    number result = anCoeff;
+template<typename T>
+T Polynom<T>::evaluateAtPoint(T x) {
+    T result = anCoeff;
 
-    std::vector<number> rootsArray = roots->GetArray();
+    std::vector<T> rootsArray = roots->GetArray();
 
     for (size_t i = 0; i < rootsArray.size(); ++i) {
         result = result * (x - rootsArray[i]);
@@ -93,7 +131,8 @@ number Polynom::evaluateAtPoint(number x) {
     return result;
 }
 
-QString Polynom::PrintNonCanonicalForm() {
+template<typename T>
+QString Polynom<T>::PrintNonCanonicalForm() {
     QString output = "";
     // Проверка, есть ли корни
     if (roots->GetArray().empty()) {
@@ -102,10 +141,18 @@ QString Polynom::PrintNonCanonicalForm() {
     }
 
     // Выводим ведущий коэффициент
-    output += "(" + anCoeff.GetComplexString() + ") * ";
+    if constexpr (std::is_same<T, Complex>::value) {
+        output += "(" + anCoeff.GetComplexString() + ") * ";
+    } else {
+        output += "(" + QString::number(anCoeff) + ") * ";
+    }
 
     for (size_t i = 0; i < roots->GetArray().size(); ++i) {
-        output += "(x - (" + roots->GetArray()[i].GetComplexString() + "))";
+        if constexpr (std::is_same<T, Complex>::value) {
+            output += "(x - (" + roots->GetArray()[i].GetComplexString() + "))";
+        } else {
+            output += "(x - " + QString::number(roots->GetArray()[i]) + ")";
+        }
         if (i < roots->GetArray().size() - 1) {
             output += " * ";
         }
@@ -113,7 +160,8 @@ QString Polynom::PrintNonCanonicalForm() {
     return output;
 }
 
-QString Polynom::PrintCanonicalForm() {
+template<typename T>
+QString Polynom<T>::PrintCanonicalForm() {
     QString output;
 
     // Проверка, есть ли корни
@@ -121,8 +169,8 @@ QString Polynom::PrintCanonicalForm() {
         return "Полином не имеет корней.";
     }
 
-    std::vector<number> rootsArray = roots->GetArray();
-    std::vector<number> canonicalPoly = expandPolynomial(anCoeff, rootsArray);
+    std::vector<T> rootsArray = roots->GetArray();
+    std::vector<T> canonicalPoly = expandPolynomial(anCoeff, rootsArray);
 
     bool firstTerm = true;
 
@@ -149,10 +197,14 @@ QString Polynom::PrintCanonicalForm() {
 
     // Обратный проход по коэффициентам для вывода от старшей степени к младшей
     for (int i = canonicalPoly.size() - 1; i >= 0; --i) {
-        number coeff = canonicalPoly[i];
+        T coeff = canonicalPoly[i];
 
         // Проверяем, что коэффициент не является нулевым
-        if (coeff.getReal() == 0 && coeff.getImaginary() == 0) continue;
+        if constexpr (std::is_same<T, Complex>::value) {
+            if (coeff.getReal() == 0 && coeff.getImaginary() == 0) continue;
+        } else {
+            if (coeff == 0) continue;
+        }
 
         // Добавляем знак перед членом (если это не первый член)
         if (!firstTerm) {
@@ -163,21 +215,25 @@ QString Polynom::PrintCanonicalForm() {
             }
         }
 
-        double realPart = coeff.getReal();
-        double imaginaryPart = coeff.getImaginary();
+        if constexpr (std::is_same<T, Complex>::value) {
+            double realPart = coeff.getReal();
+            double imaginaryPart = coeff.getImaginary();
 
-        // Обрабатываем случай, когда реальная часть = 0, но мнимая часть ненулевая
-        if (realPart == 0 && imaginaryPart != 0) {
-            output += (imaginaryPart >= 0 ? "+" : "") + QString::number(imaginaryPart) + "i";
-        } else {
-            // Обрабатываем модуль коэффициента для реальных частей
-            if (std::abs(realPart) != 1 || imaginaryPart != 0) {
-                output += QString::number(realPart) + (imaginaryPart >= 0 ? "+" : "") +
-                          QString::number(imaginaryPart) + "i";
+            // Обрабатываем случай, когда реальная часть = 0, но мнимая часть ненулевая
+            if (realPart == 0 && imaginaryPart != 0) {
+                output += (imaginaryPart >= 0 ? "+" : "") + QString::number(imaginaryPart) + "i";
             } else {
-                output += (realPart == 0 ? "" : QString::number(realPart)) + (imaginaryPart >= 0 ? "+" : "") +
-                          QString::number(imaginaryPart) + "i";
+                // Обрабатываем модуль коэффициента для реальных частей
+                if (std::abs(realPart) != 1 || imaginaryPart != 0) {
+                    output += QString::number(realPart) + (imaginaryPart >= 0 ? "+" : "") +
+                              QString::number(imaginaryPart) + "i";
+                } else {
+                    output += (realPart == 0 ? "" : QString::number(realPart)) + (imaginaryPart >= 0 ? "+" : "") +
+                              QString::number(imaginaryPart) + "i";
+                }
             }
+        } else {
+            output += QString::number(coeff);
         }
 
         // Добавляем x^степень

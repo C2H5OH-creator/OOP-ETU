@@ -17,13 +17,29 @@ public:
      UDPCommunicator(QObject *parent, int t_port);
     ~UDPCommunicator();
 
+    struct MessageData {
+         bool dataType;
+         QString sender;
+         int action;
+         QList<QVariant> roots;  // Список корней (вещественные или комплексные)
+         QString serverResponse;
+         double evaluateReal;
+         double evaluateImag;
+         QString canonForm;
+         QString nonCanonForm;
+    };
+
+
     void sendData(const QHostAddress &sender, unsigned short senderPort, const QString &receivedMessage);
 
-    QString createJsonMessage(const QString& sender, int action,
+    QString createJsonMessage(const bool& dataType,
+                              const QString& sender, int action,
                               const QList<QVariant>& roots,
                               const QString& serverResponse,
                               double evaluateReal, double evaluateImag,
                               const QString& canonForm, const QString& nonCanonForm);
+
+    MessageData parseJsonMessage(const QString& jsonString);
 
 signals:
     void messageReceived(const QString &message);

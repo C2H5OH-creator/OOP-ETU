@@ -13,6 +13,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QGroupBox>
 
 #include <QJsonObject>
 #include <QJsonArray>
@@ -27,7 +28,6 @@ public:
     ~Interface();
 
 private slots:
-    //void onRadioButtonClicked();
     void OnCreatePolynomClicked();
     void OnChangeValueClicked();
     void OnCalcPolynomClicked();
@@ -36,12 +36,25 @@ private slots:
     void onConfirmCreate();
     void onClearCreateFields();
     void onConfirmChangeButton();
+    void createLeftLayout();
+    void createRightLayout();
 
 public slots:
     void handleMessage(const QString &message);
 
 private:
     UDPCommunicator* communicator;
+
+    QRadioButton *complexRadio;
+    QRadioButton *realRadio;
+
+    QVBoxLayout *printLayout;
+
+    QHBoxLayout *mainLayout;
+    QVBoxLayout *rightLayout;
+
+    QVBoxLayout *changeLayout;
+    QVBoxLayout *calcLayout;
 
     QWidget *centralWidget;
     QVBoxLayout *leftLayout;
