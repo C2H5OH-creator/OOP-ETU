@@ -239,7 +239,7 @@ void Interface::createRightComplexLayout()
         QString serverResponse = "";
 
         // Создание JSON строки с использованием новой функции
-        QString jsonString = communicator->createJsonMessage(1,sender, action, roots, serverResponse, evaluateReal, evaluateImaginary,"","");
+        QString jsonString = communicator->createJsonMessage(0,sender, action, roots, serverResponse, evaluateReal, evaluateImaginary,"","");
 
         // Отправка JSON строки
         communicator->sendData(QHostAddress("0.0.0.0"), server_port, jsonString);
