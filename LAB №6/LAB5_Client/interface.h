@@ -37,16 +37,21 @@ private slots:
     void onClearCreateFields();
     void onConfirmChangeButton();
     void createLeftLayout();
-    void createRightLayout();
+    void createRightComplexLayout();
+    void createRightDoubleLayout();
+    void onNumberSetChanged();
 
 public slots:
     void handleMessage(const QString &message);
+
 
 private:
     UDPCommunicator* communicator;
 
     QRadioButton *complexRadio;
     QRadioButton *realRadio;
+
+    bool isComplex = true;
 
     QVBoxLayout *printLayout;
 
@@ -59,9 +64,12 @@ private:
     QWidget *centralWidget;
     QVBoxLayout *leftLayout;
     QVBoxLayout *createLayout;
+    QVBoxLayout *createDoubleLayout;
 
     QLineEdit *rootCountInput;
+    QLineEdit *doubleRootCountInput;
 
+    QLineEdit *aNInput;
     QLineEdit *aNInputReal;
     QLineEdit *aNInputImaginary;
 
@@ -84,11 +92,26 @@ private:
     QLabel* rootInputLabel;
 
     QVector<QPair<QLineEdit*, QLineEdit*>> rootInputs;
+    QVector<QLineEdit*> doubleRootInputs;
     QVector<QHBoxLayout*> rootInputLayouts;
 
+    //Для вещественных чисел
+    QWidget *createDoublePolynomWidget;
+    QWidget *changeDoubleValueWidget;
+    QWidget *calcDoublePolynomWidget;
+
+    QLineEdit *changeInputAn;
+    QLineEdit *changeRealInputIndex;
+    QLineEdit *changeInputRoot;
+
+    QLineEdit* calcDoubleValueReal;
+
+    //Для комплексных чисел
     QWidget *createPolynomWidget;
     QWidget *changeValueWidget;
     QWidget *calcPolynomWidget;
+
+    //Общее
     QWidget *printPolynomWidget;
 
     QLabel *canonicalFormLabel;

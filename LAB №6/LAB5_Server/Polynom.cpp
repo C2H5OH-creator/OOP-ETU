@@ -208,10 +208,12 @@ QString Polynom<T>::PrintCanonicalForm() {
 
         // Добавляем знак перед членом (если это не первый член)
         if (!firstTerm) {
-            if (coeff.getReal() >= 0) {
-                output += " + "; // Положительный знак
-            } else {
-                output += " - "; // Отрицательный знак
+            if constexpr (std::is_same<T, Complex>::value) {
+                if (coeff.getReal() >= 0) {
+                    output += " + "; // Положительный знак
+                } else {
+                    output += " - "; // Отрицательный знак
+                }
             }
         }
 
@@ -249,3 +251,92 @@ QString Polynom<T>::PrintCanonicalForm() {
 
     return output;
 }
+
+
+template<typename T>
+QString Polynom<T>::PrintDoubleNonCanonicalForm() {
+    QString output;
+
+    // Проверка, есть ли корни
+    if (roots->GetArray().empty()) {
+        std::cout << "Полином не имеет корней." << std::endl;
+        return "";
+    }
+
+    // Выводим ведущий коэффициент
+    output += "(" + QString::number(anCoeff) + ") * ";
+
+    for (size_t i = 0; i < roots->GetArray().size(); ++i) {
+        output += "(x - " + QString::number(roots->GetArray()[i]) + ")";
+        if (i < roots->GetArray().size() - 1) {
+            output += " * ";
+        }
+    }
+
+    return output;
+}
+
+template<typename T>
+QString Polynom<T>::PrintDoubleCanonicalForm() {
+    QString output;
+
+    // Проверка, есть ли корни
+    if (roots->GetArray().empty()) {
+        return "Полином не имеет корней.";
+    }
+
+    std::vector<double> rootsArray = roots->GetArray();
+    std::vector<double> canonicalPoly = expandPolynomial(anCoeff, rootsArray);
+
+    bool firstTerm = true;
+
+    // Функция для преобразования целого числа в символы суперскрипта
+    auto ToSuperscript = [](int num) -> QString {
+        QString superscript;
+        QString digits = QString::number(num);
+        for (QChar digit : digits) {
+            switch (digit.toLatin1()) {
+            case '0': superscript += "⁰"; break;
+            case '1': superscript += "¹"; break;
+            case '2': superscript += "²"; break;
+            case '3': superscript += "³"; break;
+            case '4': superscript += "⁴"; break;
+            case '5': superscript += "⁵"; break;
+            case '6': superscript += "⁶"; break;
+            case '7': superscript += "⁷"; break;
+            case '8': superscript += "⁸"; break;
+            case '9': superscript += "⁹"; break;
+            }
+        }
+        return superscript;
+    };
+
+    // Обратный проход по коэффициентам для вывода от старшей степени к младшей
+    for (int i = canonicalPoly.size() - 1; i >= 0; --i) {
+        double coeff = canonicalPoly[i];
+
+        // Пропускаем нулевые коэффициенты
+        if (coeff == 0) continue;
+
+        // Добавляем знак перед членом (если это не первый член)
+        if (!firstTerm) {
+            output += (coeff > 0 ? " + " : " - ");
+        }
+
+        // Добавляем модуль коэффициента
+        output += QString::number(std::abs(coeff));
+
+        // Добавляем x^степень
+        if (i > 0) {
+            output += "x";
+            if (i > 1) {
+                output += ToSuperscript(i);
+            }
+        }
+
+        firstTerm = false; // После первого члена переключаем флаг
+    }
+
+    return output;
+}
+

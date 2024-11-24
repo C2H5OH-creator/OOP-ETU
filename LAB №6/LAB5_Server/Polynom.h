@@ -38,6 +38,12 @@ public:
 
     QString PrintNonCanonicalForm();
 
+    QString PrintDoubleCanonicalForm();
+
+    QString PrintDoubleNonCanonicalForm();
+
+
+
     Array<T>* GetRoots() { return roots.get(); }
     Array<T>* GetCoeffs() { return coefficient.get(); }
 

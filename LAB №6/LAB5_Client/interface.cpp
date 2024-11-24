@@ -18,7 +18,8 @@ Interface::Interface(QWidget *parent)
 
     // Создаём левый и правый макеты
     createLeftLayout();
-    createRightLayout();
+    createRightComplexLayout();
+    createRightDoubleLayout();
 
     // Создание групп боксов для каждого макета
     QGroupBox *leftGroupBox = new QGroupBox("Настройки");
@@ -75,6 +76,9 @@ void Interface::createLeftLayout()
     auto calcPolynom = new QRadioButton("Вычислить значение полинома в точке");
     auto printPolynom = new QRadioButton("Вывести полином");
 
+    connect(complexRadio, &QRadioButton::clicked, this, &Interface::onNumberSetChanged);
+    connect(realRadio, &QRadioButton::clicked, this, &Interface::onNumberSetChanged);
+
     // Подключение сигналов
     connect(createPolynom, &QRadioButton::clicked, this, &Interface::OnCreatePolynomClicked);
     connect(changeValue, &QRadioButton::clicked, this, &Interface::OnChangeValueClicked);
@@ -93,8 +97,8 @@ void Interface::createLeftLayout()
 
 
 // Функция создания правого Layout
-void Interface::createRightLayout()
-{
+void Interface::createRightComplexLayout()
+{    
     rightLayout = new QVBoxLayout();
     // Виджет для создания полинома
     createPolynomWidget = new QWidget(this);
@@ -235,7 +239,7 @@ void Interface::createRightLayout()
         QString serverResponse = "";
 
         // Создание JSON строки с использованием новой функции
-        QString jsonString = communicator->createJsonMessage(0,sender, action, roots, serverResponse, evaluateReal, evaluateImaginary,"","");
+        QString jsonString = communicator->createJsonMessage(1,sender, action, roots, serverResponse, evaluateReal, evaluateImaginary,"","");
 
         // Отправка JSON строки
         communicator->sendData(QHostAddress("0.0.0.0"), server_port, jsonString);
@@ -270,80 +274,345 @@ void Interface::createRightLayout()
     rightLayout->addWidget(printPolynomWidget);
 }
 
+
+void Interface::createRightDoubleLayout(){
+    // Виджет для создания полинома
+    createDoublePolynomWidget = new QWidget(this);
+    createDoubleLayout = new QVBoxLayout(createDoublePolynomWidget);
+
+    createDoubleLayout->addWidget(new QLabel("Сколько корней вы хотите?", this));
+    doubleRootCountInput = new QLineEdit(this);
+    createDoubleLayout->addWidget(doubleRootCountInput);
+
+    createDoubleLayout->addWidget(new QLabel("Введите коэффициент An:", this));
+
+    aNInput = new QLineEdit(this);
+    aNInput->setPlaceholderText(QString("Коэфф. An"));
+
+    QHBoxLayout *aNLayout = new QHBoxLayout();
+    aNLayout->addWidget(aNInput);
+    createDoubleLayout->addLayout(aNLayout);
+
+    // Заголовок для ввода корней
+    rootInputLabel = new QLabel("Введите корни ниже:", this);
+    rootInputLabel->hide(); // Скрываем по умолчанию
+    createDoubleLayout->addWidget(rootInputLabel);
+
+
+    // Слот для изменения количества корней
+    connect(doubleRootCountInput, &QLineEdit::textChanged, this, &Interface::onRootCountChanged);
+
+    // Кнопка подтверждения для создания полинома
+    auto confirmCreateButton = new QPushButton("Подтвердить", this);
+    connect(confirmCreateButton, &QPushButton::clicked, this, &Interface::onConfirmCreate);
+    createDoubleLayout->addWidget(confirmCreateButton);
+
+    // Кнопка очистки
+    auto clearCreateButton = new QPushButton("Очистить", this);
+    connect(clearCreateButton, &QPushButton::clicked, this, &Interface::onClearCreateFields);
+    createDoubleLayout->addWidget(clearCreateButton);
+
+    //=============================================//
+
+    // Виджет для изменения значения
+    changeDoubleValueWidget = new QWidget(this);
+    QVBoxLayout *changeLayout = new QVBoxLayout(changeDoubleValueWidget);
+
+    // Добавление радиокнопок для изменения An или корня
+    changeAnButton = new QRadioButton("Изменить An", this);
+    changeRootButton = new QRadioButton("Изменить корень по индексу", this);
+    changeLayout->addWidget(changeAnButton);
+    changeLayout->addWidget(changeRootButton);
+
+    // Поля для ввода
+    changeInputAn = new QLineEdit(this);
+    changeInputAn->setPlaceholderText(QString("Коэфф. An"));
+
+    changeRealInputIndex = new QLineEdit(this);
+    changeRealInputIndex->setPlaceholderText(QString("Индекс"));
+
+    changeInputRoot = new QLineEdit(this);
+    changeInputRoot->setPlaceholderText(QString("Корень"));
+
+    // Установка валидации для индекса
+    changeRealInputIndex->setValidator(new QIntValidator(0, 100, this)); // Установите пределы по необходимости
+
+    // Подключение сигналов для радиокнопок
+    connect(changeAnButton, &QRadioButton::clicked, [this]() {
+        changeInputAn->show();
+        changeRealInputIndex->hide();
+        changeInputRoot->hide();
+    });
+    connect(changeRootButton, &QRadioButton::clicked, [this]() {
+        changeInputAn->hide();
+        changeRealInputIndex->show();
+        changeInputRoot->show();
+    });
+
+    changeLayout->addWidget(changeInputAn);
+    changeLayout->addWidget(changeRealInputIndex);
+    changeLayout->addWidget(changeInputRoot);
+
+    QPushButton *confirmChangeButton = new QPushButton("Подтвердить", this);
+    connect(confirmChangeButton, &QPushButton::clicked, this, &Interface::onConfirmChangeButton);
+    changeLayout->addWidget(confirmChangeButton);
+
+    // Скрыть поля для ввода
+    changeInputAn->hide();
+    changeInputAnImaginary->hide();
+    changeInputRoot->hide();
+
+    //=============================================//
+
+    // Виджет для вычисления значения полинома
+    calcDoublePolynomWidget = new QWidget(this);
+    QVBoxLayout *calcLayout = new QVBoxLayout(calcDoublePolynomWidget);
+
+    // Заголовок для ввода значения
+    calcLayout->addWidget(new QLabel("Введите значение для вычисления:", this));
+
+    // Поле для ввода действительной части x
+    calcDoubleValueReal = new QLineEdit(this);
+    calcDoubleValueReal->setPlaceholderText(QString("x"));
+    calcLayout->addWidget(calcDoubleValueReal);
+
+    QPushButton *confirmCalcButton = new QPushButton("Подтвердить", this);
+    connect(confirmCalcButton, &QPushButton::clicked, [this]() {
+        // Данные для создания JSON
+        QString sender = "Client";
+        int action = CALCULATE_VALUE_POLYNOMIAL_AT_POINT;
+
+        // Пустой массив корней для текущего примера
+        QList<QVariant> roots;
+
+        // Значения для поля evaluate_value
+        double evaluateReal = calcDoubleValueReal->text().toDouble();
+        double evaluateImaginary = 0;
+
+        // Пустой ответ сервера
+        QString serverResponse = "";
+
+        // Создание JSON строки с использованием новой функции
+        QString jsonString = communicator->createJsonMessage(1,sender, action, roots, serverResponse, evaluateReal, evaluateImaginary,"","");
+
+        // Отправка JSON строки
+        communicator->sendData(QHostAddress("0.0.0.0"), server_port, jsonString);
+    });
+
+    calcLayout->addWidget(confirmCalcButton);
+
+    //=============================================//
+
+    // Виджет для вывода полинома
+    printPolynomWidget = new QWidget(this);
+    QVBoxLayout *printLayout = new QVBoxLayout(printPolynomWidget);
+
+    printLayout->addWidget(new QLabel("Каноническая форма:", this));
+    canonicalFormLabel = new QLabel(this);
+    printLayout->addWidget(canonicalFormLabel);
+
+    printLayout->addWidget(new QLabel("Не каноническая форма:", this));
+    nonCanonicalFormLabel = new QLabel(this);
+    printLayout->addWidget(nonCanonicalFormLabel);
+
+    // Скрытие всех виджетов по умолчанию
+    createDoublePolynomWidget->hide();
+    changeDoubleValueWidget->hide();
+    calcDoublePolynomWidget->hide();
+    printPolynomWidget->hide();
+
+    // Добавление виджетов в правый Layout
+    rightLayout->addWidget(createDoublePolynomWidget);
+    rightLayout->addWidget(changeDoubleValueWidget);
+    rightLayout->addWidget(calcDoublePolynomWidget);
+    rightLayout->addWidget(printPolynomWidget);
+
+}
+
 Interface::~Interface() {}
 
 void Interface::OnCreatePolynomClicked() {
-    changeValueWidget->hide();
-    calcPolynomWidget->hide();
-    printPolynomWidget->hide();
-    createPolynomWidget->show();
+    if(isComplex){
+
+        changeDoubleValueWidget->hide();
+        calcDoublePolynomWidget->hide();
+        printPolynomWidget->hide();
+
+        changeValueWidget->hide();
+        calcPolynomWidget->hide();
+        printPolynomWidget->hide();
+        createPolynomWidget->show();
+    } else {
+
+        changeValueWidget->hide();
+        calcPolynomWidget->hide();
+        printPolynomWidget->hide();
+
+        changeDoubleValueWidget->hide();
+        calcDoublePolynomWidget->hide();
+        printPolynomWidget->hide();
+        createDoublePolynomWidget->show();
+    }
+
 }
 
-void Interface::OnChangeValueClicked() {
-    createPolynomWidget->hide();
-    calcPolynomWidget->hide();
-    printPolynomWidget->hide();
-    changeValueWidget->show();
+void Interface::OnChangeValueClicked() {   
+    if(isComplex){
+        calcDoublePolynomWidget->hide();
+        printPolynomWidget->hide();
+        createDoublePolynomWidget->hide();
+
+
+        calcPolynomWidget->hide();
+        printPolynomWidget->hide();
+        createPolynomWidget->hide();
+        changeValueWidget->show();
+    } else {
+
+        calcPolynomWidget->hide();
+        printPolynomWidget->hide();
+        createPolynomWidget->hide();
+
+        calcDoublePolynomWidget->hide();
+        printPolynomWidget->hide();
+        changeDoubleValueWidget->show();
+        createDoublePolynomWidget->hide();
+    }
 }
 
 void Interface::OnCalcPolynomClicked() {
-    createPolynomWidget->hide();
-    changeValueWidget->hide();
-    printPolynomWidget->hide();
-    calcPolynomWidget->show();
+    if(isComplex){
+        changeDoubleValueWidget->hide();
+        printPolynomWidget->hide();
+        createDoublePolynomWidget->hide();
+
+        changeValueWidget->hide();
+        printPolynomWidget->hide();
+        createPolynomWidget->hide();
+        calcPolynomWidget->show();
+    } else {
+
+        changeValueWidget->hide();
+        printPolynomWidget->hide();
+        createPolynomWidget->hide();
+
+        changeDoubleValueWidget->hide();
+        printPolynomWidget->hide();
+        createDoublePolynomWidget->hide();
+        calcDoublePolynomWidget->show();
+    }
 }
 
 void Interface::OnPrintPolynomClicked() {
-    createPolynomWidget->hide();
-    changeValueWidget->hide();
-    calcPolynomWidget->hide();
-    printPolynomWidget->show();
+    if(isComplex){
+        changeDoubleValueWidget->hide();
+        calcDoublePolynomWidget->hide();
+        createDoublePolynomWidget->hide();
 
-    QJsonObject jsonObject1;
-    jsonObject1["sender"] = "Client";
-    jsonObject1["action"] = GET_POLYNOM_FORMS;
-    QJsonDocument jsonDoc1(jsonObject1);
-    QString jsonCanonForm = jsonDoc1.toJson(QJsonDocument::Compact);
+        changeValueWidget->hide();
+        calcPolynomWidget->hide();
+        createPolynomWidget->hide();
+        printPolynomWidget->show();
+    } else {
+        changeValueWidget->hide();
+        calcPolynomWidget->hide();
+        createPolynomWidget->hide();
+
+        changeDoubleValueWidget->hide();
+        calcDoublePolynomWidget->hide();
+        createDoublePolynomWidget->hide();
+        printPolynomWidget->show();
+    }
+
+    QList<QVariant> emptyList;
+    QString jsonCanonForm;
+
+    jsonCanonForm = communicator->createJsonMessage(!isComplex,"client",
+                                                            GET_POLYNOM_FORMS, emptyList,"" ,
+                                                            0,0,"","");
 
     communicator->sendData(QHostAddress("0.0.0.0"), server_port, jsonCanonForm);
+
+}
+
+void Interface::onNumberSetChanged() {
+    // Определяем, какое множество выбрано
+    if (realRadio->isChecked()) {
+        isComplex = false;
+    } else {
+        isComplex = true;
+    }
 }
 
 void Interface::onRootCountChanged(const QString &text) {
     int rootCount = text.toInt();
+    if (isComplex){
+        // Очистить предыдущие поля корней
+        for (auto &rootPair : rootInputs) {
+            delete rootPair.first;
+            delete rootPair.second;
+        }
+        rootInputs.clear();
 
-    // Очистить предыдущие поля корней
-    for (auto &rootPair : rootInputs) {
-        delete rootPair.first;
-        delete rootPair.second;
+        // Устанавливаем минимальный размер окна при удалении полей
+        if (rootCount == 0 || text.isEmpty()) {
+            rootInputLabel->hide();
+            setMinimumSize(QSize(200, 150)); // Минимальный размер окна
+        } else {
+            rootInputLabel->show();
+
+        }
+
+        // Добавить поля для корней с подписью
+        for (int i = 0; i < rootCount; ++i) {
+            QLineEdit *realPart = new QLineEdit(this);
+            realPart->setPlaceholderText(QString("Действ. часть %1-го корня").arg(i + 1));
+            QLineEdit *imaginaryPart = new QLineEdit(this);
+            imaginaryPart->setPlaceholderText(QString("Мним. часть %1-го корня").arg(i + 1));
+
+            QHBoxLayout *rootLayout = new QHBoxLayout();
+            rootLayout->addWidget(realPart);
+            rootLayout->addWidget(imaginaryPart);
+
+            rootInputLayouts.append(rootLayout);
+            rootInputs.push_back(qMakePair(realPart, imaginaryPart));
+            createLayout->addLayout(rootLayout);
+        }
+
+        // Установка минимального размера окна в зависимости от количества полей
+        adjustSize();
     }
-    rootInputs.clear();
+    else {
+        // Очистить предыдущие поля корней
+        for (auto &root: doubleRootInputs) {
+            delete root;
+        }
+        doubleRootInputs.clear();
 
-    // Устанавливаем минимальный размер окна при удалении полей
-    if (rootCount == 0 || text.isEmpty()) {
-        rootInputLabel->hide();
-        setMinimumSize(QSize(200, 150)); // Минимальный размер окна
-    } else {
-        rootInputLabel->show();
+        // Устанавливаем минимальный размер окна при удалении полей
+        if (rootCount == 0 || text.isEmpty()) {
+            rootInputLabel->hide();
+            setMinimumSize(QSize(200, 150)); // Минимальный размер окна
+        } else {
+            rootInputLabel->show();
+
+        }
+
+        for (int i = 0; i < rootCount; ++i) {
+            QLineEdit *root = new QLineEdit(this);
+            root->setPlaceholderText(QString("%1-й корень").arg(i + 1));
+
+            QHBoxLayout *doubleRootLayout = new QHBoxLayout();
+            doubleRootLayout->addWidget(root);
+
+            rootInputLayouts.append(doubleRootLayout);
+            doubleRootInputs.push_back(root);
+            createDoubleLayout->addLayout(doubleRootLayout);
+        }
+        // Установка минимального размера окна в зависимости от количества полей
+        adjustSize();
     }
 
-    // Добавить поля для корней с подписью
-    for (int i = 0; i < rootCount; ++i) {
-        QLineEdit *realPart = new QLineEdit(this);
-        realPart->setPlaceholderText(QString("Действ. часть %1-го корня").arg(i + 1));
-        QLineEdit *imaginaryPart = new QLineEdit(this);
-        imaginaryPart->setPlaceholderText(QString("Мним. часть %1-го корня").arg(i + 1));
-
-        QHBoxLayout *rootLayout = new QHBoxLayout();
-        rootLayout->addWidget(realPart);
-        rootLayout->addWidget(imaginaryPart);
-
-        rootInputLayouts.append(rootLayout);
-        rootInputs.push_back(qMakePair(realPart, imaginaryPart));
-        createLayout->addLayout(rootLayout);
-    }
-
-    // Установка минимального размера окна в зависимости от количества полей
-    adjustSize();
 }
 
 void Interface::onConfirmCreate() {
@@ -356,16 +625,26 @@ void Interface::onConfirmCreate() {
 
     // Добавляем коэффициент an
     QVariantMap anObject;
-    anObject["real"] = aNInputReal->text().toDouble();
-    anObject["imag"] = aNInputImaginary->text().toDouble();
+    anObject["real"] = (isComplex)?(aNInputReal->text().toDouble()) : (aNInput->text().toDouble());
+    anObject["imag"] = (isComplex)?(aNInputImaginary->text().toDouble()) : (0);
     roots.append(anObject);
 
-    // Добавляем корни
-    for (const auto &rootPair : rootInputs) {
-        QVariantMap rootObject;
-        rootObject["real"] = rootPair.first->text().toDouble();
-        rootObject["imag"] = rootPair.second->text().toDouble();
-        roots.append(rootObject);
+    if(isComplex){
+        // Добавляем корни
+        for (const auto &rootPair : rootInputs) {
+            QVariantMap rootObject;
+            rootObject["real"] = rootPair.first->text().toDouble();
+            rootObject["imag"] = rootPair.second->text().toDouble();
+            roots.append(rootObject);
+        }
+    } else if (isComplex == false) {
+        // Добавляем корни
+        for (const auto &root : doubleRootInputs) {
+            QVariantMap rootObject;
+            rootObject["real"] = root->text().toDouble();
+            rootObject["imag"] = 0;
+            roots.append(rootObject);
+        }
     }
 
     // Пустой ответ сервера и значение evaluate_value
@@ -374,7 +653,7 @@ void Interface::onConfirmCreate() {
     double evaluateImaginary = 0.0;
 
     // Создание JSON строки с использованием новой функции
-    QString jsonString = communicator->createJsonMessage(0,sender, action, roots, serverResponse, evaluateReal, evaluateImaginary,"","");
+    QString jsonString = communicator->createJsonMessage(((isComplex) ? (0) : (1)),sender, action, roots, serverResponse, evaluateReal, evaluateImaginary,"","");
 
     // Отправка JSON строки через ваш класс Communicator
     communicator->sendData(QHostAddress("0.0.0.0"), server_port, jsonString);
@@ -383,63 +662,123 @@ void Interface::onConfirmCreate() {
 }
 
 void Interface::onClearCreateFields() {
-    // Очистка полей ввода
-    rootCountInput->clear();
-    aNInputReal->clear();
-    aNInputImaginary->clear();
+    if(isComplex){
+        // Очистка полей ввода
+        rootCountInput->clear();
+        aNInputReal->clear();
+        aNInputImaginary->clear();
 
-    for (auto &rootPair : rootInputs) {
-        rootPair.first->clear();
-        rootPair.second->clear();
+        for (auto &rootPair : rootInputs) {
+            rootPair.first->clear();
+            rootPair.second->clear();
+        }
+
+        // Скрыть метку для корней и очистить массив
+        rootInputLabel->hide();
+        for (auto &rootPair : rootInputs) {
+            delete rootPair.first;
+            delete rootPair.second;
+        }
+        rootInputs.clear();
+    } else {
+        // Очистка полей ввода
+        doubleRootCountInput->clear();
+        aNInput->clear();
+
+        for (auto &root : doubleRootInputs) {
+            root->clear();
+        }
+
+        // Скрыть метку для корней и очистить массив
+        rootInputLabel->hide();
+        for (auto &root : doubleRootInputs) {
+            delete root;
+        }
+        doubleRootInputs.clear();
+
     }
 
-    // Скрыть метку для корней и очистить массив
-    rootInputLabel->hide();
-    for (auto &rootPair : rootInputs) {
-        delete rootPair.first;
-        delete rootPair.second;
-    }
-    rootInputs.clear();
 }
 
 
 void Interface::onConfirmChangeButton(){
-    if (changeRootButton->isChecked()) {
-        // Собираем массив
-        QList<QVariant> roots;
-        QVariantMap an;
-        an["real"] = 0;
-        an["imag"] = 0;
-        roots.append(an);
+    if(isComplex){
+        if (changeRootButton->isChecked()) {
+            // Собираем массив
+            QList<QVariant> roots;
+            QVariantMap an;
+            an["real"] = 0;
+            an["imag"] = 0;
+            roots.append(an);
 
-        QVariantMap index;
-        index["real"] = changeInputIndex->text().toUInt();
-        index["imag"] = 0;
-        roots.append(index);
+            QVariantMap index;
+            index["real"] = changeInputIndex->text().toUInt();
+            index["imag"] = 0;
+            roots.append(index);
 
-        QVariantMap rootObject;
-        rootObject["real"] = changeInputRootReal->text().toDouble();
-        rootObject["imag"] = changeInputRootImaginary->text().toDouble();
-        roots.append(rootObject);
+            QVariantMap rootObject;
+            rootObject["real"] = changeInputRootReal->text().toDouble();
+            rootObject["imag"] = changeInputRootImaginary->text().toDouble();
+            roots.append(rootObject);
 
-        QString change_root = communicator->createJsonMessage(0,"client",CHANGE_ROOT,roots,"",0,0,"","");
-        communicator->sendData(QHostAddress("0.0.0.0"), server_port, change_root);
+            QString change_root = communicator->createJsonMessage(0,"client",CHANGE_ROOT,roots,"",0,0,"","");
+            communicator->sendData(QHostAddress("0.0.0.0"), server_port, change_root);
 
-        QMessageBox::information(this, "Подтверждено", "Корень успешно изменён!");
+            QMessageBox::information(this, "Подтверждено", "Корень успешно изменён!");
+        } else {
+            QList<QVariant> roots;
+
+            // Добавляем коэффициент an
+            QVariantMap anObject;
+            anObject["real"] = changeInputAnReal->text().toDouble();
+            anObject["imag"] = changeInputAnImaginary->text().toDouble();
+            roots.append(anObject);
+
+            QString change_root = communicator->createJsonMessage(0,"client",CHANGE_AN,roots,"",0,0,"","");
+            communicator->sendData(QHostAddress("0.0.0.0"), server_port, change_root);
+
+            QMessageBox::information(this, "Подтверждено", "An успешно изменён!");
+        }
     } else {
-        QList<QVariant> roots;
+        if (changeRootButton->isChecked()) {
+            // Собираем массив
+            QList<QVariant> roots;
+            QVariantMap an;
+            an["real"] = 0;
+            an["imag"] = 0;
+            roots.append(an);
 
-        // Добавляем коэффициент an
-        QVariantMap anObject;
-        anObject["real"] = changeInputAnReal->text().toDouble();
-        anObject["imag"] = changeInputAnImaginary->text().toDouble();
-        roots.append(anObject);
+            QVariantMap index;
+            index["real"] = changeInputIndex->text().toUInt();
+            index["imag"] = 0;
+            roots.append(index);
 
-        QString change_root = communicator->createJsonMessage(0,"client",CHANGE_AN,roots,"",0,0,"","");
-        communicator->sendData(QHostAddress("0.0.0.0"), server_port, change_root);
+            QVariantMap rootObject;
+            rootObject["real"] = changeInputRoot->text().toDouble();
+            rootObject["imag"] = 0;
+            roots.append(rootObject);
 
-        QMessageBox::information(this, "Подтверждено", "An успешно изменён!");
+            QString change_root = communicator->createJsonMessage(1,"client",CHANGE_ROOT,roots,"",0,0,"","");
+            communicator->sendData(QHostAddress("0.0.0.0"), server_port, change_root);
+
+            QMessageBox::information(this, "Подтверждено", "Корень успешно изменён!");
+        } else {
+            QList<QVariant> roots;
+
+            // Добавляем коэффициент an
+            QVariantMap anObject;
+            anObject["real"] = changeInputAn->text().toDouble();
+            anObject["imag"] = 0;
+            roots.append(anObject);
+
+            QString change_root = communicator->createJsonMessage(1,"client",CHANGE_AN,roots,"",0,0,"","");
+            communicator->sendData(QHostAddress("0.0.0.0"), server_port, change_root);
+
+            QMessageBox::information(this, "Подтверждено", "An успешно изменён!");
+        }
+
     }
+
 }
 
 void Interface::handleMessage(const QString &message){
