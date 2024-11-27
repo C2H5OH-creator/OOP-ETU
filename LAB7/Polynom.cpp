@@ -54,10 +54,6 @@ Polynom<T>::Polynom(unsigned N) {
     }
 }
 
-
-template<typename T>
-Polynom<T>::~Polynom() { }
-
 template<typename T>
 bool Polynom<T>::Create(T t_anCoeff, unsigned t_N, const QVector<T>& t_roots) {
     Clear();

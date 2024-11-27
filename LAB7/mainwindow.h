@@ -15,13 +15,16 @@
 #include <QFrame>
 #include <QLabel>
 #include <QSplitter>
+#include <QComboBox>
+#include <QDebug>
 
 #include <iostream>
 #include <memory>
 
 #include "sinus.h"
 //#include "sinus.cpp"
-#include "function.h"
+//#include "function.h"
+#include "Complex.h"
 
 class MainWindow : public QWidget
 {
@@ -55,6 +58,8 @@ private:
     std::unique_ptr<QFrame> line;
 
     std::unique_ptr<Sinus<Complex>> complexSinus;
+
+    Sinus<Complex> *test_prt;
 
 };
 #endif // MAINWINDOW_H

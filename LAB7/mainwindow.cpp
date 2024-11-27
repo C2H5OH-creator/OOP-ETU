@@ -121,8 +121,9 @@ void MainWindow::onCalculateButtonClicked() {
 
     if (selectedFunction == "sin(x)") {
         // Считаем синус для корня
-        complexSinus = std::make_unique<Sinus<Complex>>(3);
-        result = complexSinus->evaluate(Complex(realPart, imaginaryPart));  // Пример: считаем только для действительной части
+        qDebug() << precision << " "<<realPart<< " "<< imaginaryPart;
+        complexSinus = std::make_unique<Sinus<Complex>>(precision);
+        result = complexSinus->evaluate(Complex(realPart, imaginaryPart));
     } else if (selectedFunction == "Si(x)") {
         // Для интеграла (считаем интеграл синуса, как пример)
         // В реальной задаче, тут нужно будет использовать соответствующую функцию для интеграла

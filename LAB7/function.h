@@ -4,18 +4,42 @@
 #include "Polynom.h"
 #include "Polynom.cpp"
 #include "Array.h"
+#include <QDebug>
 
-
-template <typename T>
-class Function : public Polynom<double>
-{
+template<typename T>
+class Function : public Polynom<double> {
 public:
+    Function(unsigned precision, Array<double> derivatives) {
+        for (int i = 0; i < precision; i++) {
+            this->GetCoeffs().GetArray().push_back(derivatives.GetArray()[i] / factorial(i));
+        }
+    }
 
-    Function(unsigned precision, Array<double> derivatives);
+    ~Function() = default;
 
-    long long factorial(int t_n);
+    long long factorial(int t_n) {
+        if (t_n == 0 || t_n == 1) return 1;
+        long long result = 1;
+        for (int i = 2; i <= t_n; ++i) {
+            result *= i;
+        }
+        return result;
+    }
 
-    T evaluate(T x);
+    T evaluate(T x) {
+        T result;
+        if constexpr (std::is_same<T, Complex>::value) { result = Complex(0,0); }
+        else { result = 0; }
+
+        for (int i = 0; i < this->GetCoeffs().GetArray().size(); ++i) {
+            if constexpr (std::is_same<T, Complex>::value) {
+                result += this->GetCoeffs().GetArray()[i] * x.power(i);
+            } else {
+                result += this->GetCoeffs().GetArray()[i] * std::pow(x, i);
+            }
+        }
+        return result;
+    }
 };
 
 #endif // FUNCTION_H

@@ -21,7 +21,7 @@ public:
 
     Polynom(unsigned N);
 
-	~Polynom();
+    ~Polynom() { }
 
     bool Create(T t_anCoeff, unsigned t_N, const QVector<T>& t_roots);
 	
@@ -48,6 +48,8 @@ public:
 
     Array<T>* GetRoots() { return roots.get(); }
     Array<T>* GetCoeffs() { return coefficient.get(); }
+    //Array<T>& GetCoeffs() { return *coefficient; }
+
 
 private:
     std::unique_ptr<Array<T>> roots;

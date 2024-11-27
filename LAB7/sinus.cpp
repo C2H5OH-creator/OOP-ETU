@@ -1,5 +1,5 @@
-#include "sinus.h"
-
+//#include "sinus.h"
+/*
 template<typename T>
 Array<double> Sinus<T>::generateDerivatives(int precision) {
     Array<double> derivatives;
@@ -22,3 +22,4 @@ Array<double> Sinus<T>::generateDerivatives(int precision) {
 // Явная специализация для конкретных типов, если требуется
 template class Sinus<double>;
 template class Sinus<Complex>;
+*/

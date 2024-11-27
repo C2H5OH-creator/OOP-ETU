@@ -1,5 +1,5 @@
-#include "function.h"
-
+//#include "function.h"
+/*
 template<typename T>
 Function<T>::Function(unsigned precision, Array<double> derivatives) {
     for (int i = 0; i < precision; i++) {
@@ -21,7 +21,7 @@ long long Function<T>::factorial(int t_n) {
 template<typename T>
 T Function<T>::evaluate(T x) {
     T result;
-    if constexpr (std::is_same<T, Complex>::value) { result = Complex(0.0,0.0); }
+    if constexpr (std::is_same<T, Complex>::value) { result = Complex(0,0); }
     else { result = 0; }
 
     // Используем std::pow или Complex::power в зависимости от типа T
@@ -36,3 +36,4 @@ T Function<T>::evaluate(T x) {
     }
     return result;
 }
+*/
