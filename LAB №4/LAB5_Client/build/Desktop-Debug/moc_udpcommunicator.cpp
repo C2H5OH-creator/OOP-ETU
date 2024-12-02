@@ -7,7 +7,7 @@
 *****************************************************************************/
 
 #include <memory>
-#include "../../../../LAB №5/LAB5_Server/udpcommunicator.h"
+#include "../../../../LAB №6/LAB5_Server/udpcommunicator.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)

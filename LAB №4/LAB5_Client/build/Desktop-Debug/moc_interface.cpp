@@ -7,7 +7,7 @@
 *****************************************************************************/
 
 #include <memory>
-#include "../../../../LAB №5/LAB5_Client/interface.h"
+#include "../../../../LAB №6/LAB5_Client/interface.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
@@ -22,8 +22,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_Interface_t {
-    QByteArrayData data[13];
-    char stringdata0[202];
+    QByteArrayData data[17];
+    char stringdata0[287];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -43,16 +43,22 @@ QT_MOC_LITERAL(7, 117, 4), // "text"
 QT_MOC_LITERAL(8, 122, 15), // "onConfirmCreate"
 QT_MOC_LITERAL(9, 138, 19), // "onClearCreateFields"
 QT_MOC_LITERAL(10, 158, 21), // "onConfirmChangeButton"
-QT_MOC_LITERAL(11, 180, 13), // "handleMessage"
-QT_MOC_LITERAL(12, 194, 7) // "message"
+QT_MOC_LITERAL(11, 180, 16), // "createLeftLayout"
+QT_MOC_LITERAL(12, 197, 24), // "createRightComplexLayout"
+QT_MOC_LITERAL(13, 222, 23), // "createRightDoubleLayout"
+QT_MOC_LITERAL(14, 246, 18), // "onNumberSetChanged"
+QT_MOC_LITERAL(15, 265, 13), // "handleMessage"
+QT_MOC_LITERAL(16, 279, 7) // "message"
 
     },
     "Interface\0OnCreatePolynomClicked\0\0"
     "OnChangeValueClicked\0OnCalcPolynomClicked\0"
     "OnPrintPolynomClicked\0onRootCountChanged\0"
     "text\0onConfirmCreate\0onClearCreateFields\0"
-    "onConfirmChangeButton\0handleMessage\0"
-    "message"
+    "onConfirmChangeButton\0createLeftLayout\0"
+    "createRightComplexLayout\0"
+    "createRightDoubleLayout\0onNumberSetChanged\0"
+    "handleMessage\0message"
 };
 #undef QT_MOC_LITERAL
 
@@ -62,7 +68,7 @@ static const uint qt_meta_data_Interface[] = {
        8,       // revision
        0,       // classname
        0,    0, // classinfo
-       9,   14, // methods
+      13,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -70,15 +76,19 @@ static const uint qt_meta_data_Interface[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    0,   59,    2, 0x08 /* Private */,
-       3,    0,   60,    2, 0x08 /* Private */,
-       4,    0,   61,    2, 0x08 /* Private */,
-       5,    0,   62,    2, 0x08 /* Private */,
-       6,    1,   63,    2, 0x08 /* Private */,
-       8,    0,   66,    2, 0x08 /* Private */,
-       9,    0,   67,    2, 0x08 /* Private */,
-      10,    0,   68,    2, 0x08 /* Private */,
-      11,    1,   69,    2, 0x0a /* Public */,
+       1,    0,   79,    2, 0x08 /* Private */,
+       3,    0,   80,    2, 0x08 /* Private */,
+       4,    0,   81,    2, 0x08 /* Private */,
+       5,    0,   82,    2, 0x08 /* Private */,
+       6,    1,   83,    2, 0x08 /* Private */,
+       8,    0,   86,    2, 0x08 /* Private */,
+       9,    0,   87,    2, 0x08 /* Private */,
+      10,    0,   88,    2, 0x08 /* Private */,
+      11,    0,   89,    2, 0x08 /* Private */,
+      12,    0,   90,    2, 0x08 /* Private */,
+      13,    0,   91,    2, 0x08 /* Private */,
+      14,    0,   92,    2, 0x08 /* Private */,
+      15,    1,   93,    2, 0x0a /* Public */,
 
  // slots: parameters
     QMetaType::Void,
@@ -89,7 +99,11 @@ static const uint qt_meta_data_Interface[] = {
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::QString,   12,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void, QMetaType::QString,   16,
 
        0        // eod
 };
@@ -108,7 +122,11 @@ void Interface::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 5: _t->onConfirmCreate(); break;
         case 6: _t->onClearCreateFields(); break;
         case 7: _t->onConfirmChangeButton(); break;
-        case 8: _t->handleMessage((*reinterpret_cast< const QString(*)>(_a[1]))); break;
+        case 8: _t->createLeftLayout(); break;
+        case 9: _t->createRightComplexLayout(); break;
+        case 10: _t->createRightDoubleLayout(); break;
+        case 11: _t->onNumberSetChanged(); break;
+        case 12: _t->handleMessage((*reinterpret_cast< const QString(*)>(_a[1]))); break;
         default: ;
         }
     }
@@ -143,13 +161,13 @@ int Interface::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 9)
+        if (_id < 13)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 9;
+        _id -= 13;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 9)
+        if (_id < 13)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 9;
+        _id -= 13;
     }
     return _id;
 }
