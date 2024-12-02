@@ -1,4 +1,4 @@
-
+///*
 #include "mainwindow.h"
 
 #include <QApplication>
@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
     w.show();
     return a.exec();
 }
-
+//*/
 /*
 #include <iostream>
 #include <cmath>
@@ -85,6 +85,7 @@ public:
     Function(unsigned precision, Array<double> derivatives) {
         for (int i = 0; i < precision; i++) {
             this->GetCoeffs().GetArray().push_back(derivatives.GetArray()[i] / factorial(i));
+             std::cout << "i: " << i << " "<<this->GetCoeffs().GetArray()[i] << std::endl;
         }
     }
 

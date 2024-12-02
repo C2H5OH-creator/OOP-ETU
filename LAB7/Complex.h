@@ -127,26 +127,19 @@ public:
     }
 
     Complex power(int n) const {
-        if (n == 0) return Complex(1, 0);  // Возводим в нулевую степень (по определению)
+        if (n == 0) return Complex(1, 0);
 
         Complex result(1, 0);
         Complex base = *this;
-        std::cout << "Base: " << base << std::endl;
         while (n > 0) {
             if (n % 2 == 1) {
                 result *= base;  // Используем перегруженный оператор *=
-                std::cout << "Intermediate result: " << result << std::endl;
             }
-            base *= base;  // Умножаем на себя для следующей итерации
-            std::cout << "Base squared: " << base << std::endl;
+            base *= base;  // Умножаем на себя для следующей итераци
             n /= 2;  // Делим степень на 2
         }
-        std::cout << "Final power result: " << result << std::endl;
         return result;
     }
-
-
-
 
     // Перегрузка оператора умножения для умножения комплексного числа на вещественное число
     Complex operator*(double value) const {

@@ -1,16 +1,19 @@
 #include "Polynom.h"
 
 template<typename T>
-Polynom<T>::Polynom() {
+Polynom<T>::Polynom(bool trivial) {
+
     roots = std::make_unique<Array<T>>();
     coefficient = std::make_unique<Array<T>>();
 
-    if constexpr (std::is_same<T, Complex>::value) {
-        roots->GetArray().push_back(Complex(1, 0));
-        coefficient->GetArray().push_back(Complex(1, 0));
-    } else {
-        roots->GetArray().push_back(1);
-        coefficient->GetArray().push_back(1);
+    if(trivial){
+        if constexpr (std::is_same<T, Complex>::value) {
+            roots->GetArray().push_back(Complex(1, 0));
+            coefficient->GetArray().push_back(Complex(1, 0));
+        } else {
+            roots->GetArray().push_back(1);
+            coefficient->GetArray().push_back(1);
+        }
     }
 }
 

@@ -59,7 +59,7 @@ MainWindow::MainWindow(QWidget *parent)
     leftLayout->addWidget(resultEdit.get());
 
     leftGroupBox->setLayout(leftLayout.get()); // Устанавливаем макет для левой группы
-
+/*
     // Правая часть (группа для графика)
     rightGroupBox = std::make_unique<QGroupBox>("График");
     rightLayout = std::make_unique<QVBoxLayout>(rightGroupBox.get());
@@ -80,13 +80,13 @@ MainWindow::MainWindow(QWidget *parent)
     line = std::make_unique<QFrame>();
     line->setFrameShape(QFrame::VLine);  // Вертикальная линия
     line->setFrameShadow(QFrame::Sunken);  // Тень для линии
-
+*/
     // Добавляем все в разделитель (QSplitter)
     splitter->addWidget(leftGroupBox.get());
-    splitter->addWidget(rightGroupBox.get());
+    //splitter->addWidget(rightGroupBox.get());
 
     // Устанавливаем размеры для левой и правой части (левая - 1/3, правая - 2/3)
-    splitter->setSizes({width() / 3, width() * 2 / 3});
+    //splitter->setSizes({width() / 3, width() * 2 / 3});
 
     // Добавляем splitter в главный макет
     mainLayout->addWidget(splitter.get());
@@ -107,7 +107,7 @@ void MainWindow::onCalculateButtonClicked() {
     bool okReal, okImag;
     double realPart = realPartEdit->text().toDouble(&okReal);  // Чтение действительной части
     double imaginaryPart = imaginaryPartEdit->text().toDouble(&okImag);  // Чтение мнимой части
-    int precision = precisionEdit->text().toInt();
+    unsigned precision = precisionEdit->text().toUInt();
 
     // Проверим, чтобы данные были введены корректно
     if (!okReal || !okImag) {
@@ -125,13 +125,10 @@ void MainWindow::onCalculateButtonClicked() {
         complexSinus = std::make_unique<Sinus<Complex>>(precision);
         result = complexSinus->evaluate(Complex(realPart, imaginaryPart));
     } else if (selectedFunction == "Si(x)") {
-        // Для интеграла (считаем интеграл синуса, как пример)
-        // В реальной задаче, тут нужно будет использовать соответствующую функцию для интеграла
-        //std::complex<double> root(realPart, imaginaryPart);
-        //result = std::cos(root.real());  // Пример: интеграл синуса это косинус
+        integralSinus = std::make_unique<IntegralSinus<Complex>>(precision);
+        result = integralSinus->evaluate(Complex(realPart, imaginaryPart));
     }
 
     // Отображаем результат в поле для вывода
-    //resultEdit->setText(QString::number(result, 'f', precision));
     resultEdit->setText(result.GetComplexString());
 }

@@ -3,15 +3,18 @@
 
 #include "Polynom.h"
 #include "Polynom.cpp"
+//#include "TestPolynom.h"
 #include "Array.h"
 #include <QDebug>
 
 template<typename T>
 class Function : public Polynom<double> {
 public:
-    Function(unsigned precision, Array<double> derivatives) {
+    Function(unsigned precision, Array<double> derivatives) : Polynom<double>(false) {
+        std::cout << "precision: " << precision << std::endl;
         for (int i = 0; i < precision; i++) {
             this->GetCoeffs().GetArray().push_back(derivatives.GetArray()[i] / factorial(i));
+            std::cout << "i: " << i << " "<<this->GetCoeffs().GetArray()[i] << std::endl;
         }
     }
 
@@ -32,6 +35,7 @@ public:
         else { result = 0; }
 
         for (int i = 0; i < this->GetCoeffs().GetArray().size(); ++i) {
+            std::cout << "Array size "<<this->GetCoeffs().GetArray().size() << std::endl;
             if constexpr (std::is_same<T, Complex>::value) {
                 result += this->GetCoeffs().GetArray()[i] * x.power(i);
             } else {

@@ -13,7 +13,7 @@
 template <typename T>
 class Polynom {
 public:
-	Polynom();
+    Polynom(bool trivial = true);
 	
     Polynom(T constant);
 	
@@ -47,8 +47,8 @@ public:
 
 
     Array<T>* GetRoots() { return roots.get(); }
-    Array<T>* GetCoeffs() { return coefficient.get(); }
-    //Array<T>& GetCoeffs() { return *coefficient; }
+    //Array<T>* GetCoeffs() { return coefficient.get(); }
+    Array<T>& GetCoeffs() { return *coefficient; }
 
 
 private:

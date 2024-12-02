@@ -22,6 +22,7 @@
 #include <memory>
 
 #include "sinus.h"
+#include "integralsinus.h"
 //#include "sinus.cpp"
 //#include "function.h"
 #include "Complex.h"
@@ -58,8 +59,7 @@ private:
     std::unique_ptr<QFrame> line;
 
     std::unique_ptr<Sinus<Complex>> complexSinus;
-
-    Sinus<Complex> *test_prt;
+    std::unique_ptr<IntegralSinus<Complex>> integralSinus;
 
 };
 #endif // MAINWINDOW_H
