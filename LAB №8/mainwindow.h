@@ -26,6 +26,7 @@
 //#include "sinus.cpp"
 //#include "function.h"
 #include "Complex.h"
+#include "graphwidget.h"
 
 class MainWindow : public QWidget
 {
@@ -60,6 +61,7 @@ private:
 
     std::unique_ptr<Sinus<Complex>> complexSinus;
     std::unique_ptr<IntegralSinus<Complex>> integralSinus;
+    std::unique_ptr<GraphWidget> graphWidget;
 
 };
 #endif // MAINWINDOW_H

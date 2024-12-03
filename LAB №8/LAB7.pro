@@ -13,6 +13,7 @@ SOURCES += \
     Complex.cpp \
     Polynom.cpp \
     function.cpp \
+    graphwidget.cpp \
     integralsinus.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -23,6 +24,7 @@ HEADERS += \
     Complex.h \
     Polynom.h \
     function.h \
+    graphwidget.h \
     integralsinus.h \
     mainwindow.h \
     number.h \

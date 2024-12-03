@@ -59,19 +59,22 @@ MainWindow::MainWindow(QWidget *parent)
     leftLayout->addWidget(resultEdit.get());
 
     leftGroupBox->setLayout(leftLayout.get()); // Устанавливаем макет для левой группы
-/*
+
     // Правая часть (группа для графика)
     rightGroupBox = std::make_unique<QGroupBox>("График");
     rightLayout = std::make_unique<QVBoxLayout>(rightGroupBox.get());
 
     // Создаем контейнер для центрирования метки
-    centerWidget = std::make_unique<QWidget>();
-    centerLayout = std::make_unique<QVBoxLayout>(centerWidget.get());
-    centerLayout->addStretch(1); // Заполнение сверху
-    graphPlaceholder = std::make_unique<QLabel>("Здесь позже будет график функции");
-    graphPlaceholder->setAlignment(Qt::AlignCenter); // Центрируем текст
-    centerLayout->addWidget(graphPlaceholder.get());
-    centerLayout->addStretch(1); // Заполнение снизу
+    //centerWidget = std::make_unique<QWidget>();
+    //centerLayout = std::make_unique<QVBoxLayout>(centerWidget.get());
+    //centerLayout->addStretch(1); // Заполнение сверху
+
+    // Заменяем QLabel на GraphWidget для отображения графика
+    graphWidget = std::make_unique<GraphWidget>();  // Используем класс, который рисует график
+    //centerLayout->addWidget(graphWidget.get());  // Добавляем виджет для графика
+    rightLayout->addWidget(graphWidget.get());
+
+    //centerLayout->addStretch(1); // Заполнение снизу
 
     rightLayout->addWidget(centerWidget.get()); // Добавляем контейнер в правый макет
     rightGroupBox->setLayout(rightLayout.get()); // Устанавливаем макет для правой группы
@@ -80,20 +83,20 @@ MainWindow::MainWindow(QWidget *parent)
     line = std::make_unique<QFrame>();
     line->setFrameShape(QFrame::VLine);  // Вертикальная линия
     line->setFrameShadow(QFrame::Sunken);  // Тень для линии
-*/
+
     // Добавляем все в разделитель (QSplitter)
     splitter->addWidget(leftGroupBox.get());
-    //splitter->addWidget(rightGroupBox.get());
+    splitter->addWidget(rightGroupBox.get());
 
     // Устанавливаем размеры для левой и правой части (левая - 1/3, правая - 2/3)
-    //splitter->setSizes({width() / 3, width() * 2 / 3});
+    splitter->setSizes({width() / 3, width() * 2 / 3});
 
     // Добавляем splitter в главный макет
     mainLayout->addWidget(splitter.get());
 
     setLayout(mainLayout.get());  // Устанавливаем главный макет
 
-    setWindowTitle("Лабораторная работа №7");
+    setWindowTitle("Лабораторная работа №8");
     resize(800, 600); // начальный размер окна
 
     // Привязываем обработчик к кнопке
@@ -122,11 +125,15 @@ void MainWindow::onCalculateButtonClicked() {
     if (selectedFunction == "sin(x)") {
         // Считаем синус для корня
         qDebug() << precision << " "<<realPart<< " "<< imaginaryPart;
-        complexSinus = std::make_unique<Sinus<Complex>>(precision);
-        result = complexSinus->evaluate(Complex(realPart, imaginaryPart));
+        //complexSinus = std::make_unique<Sinus<Complex>>(precision);
+        //result = complexSinus->evaluate(Complex(realPart, imaginaryPart));
+        graphWidget->drawSine();
+        graphWidget->setRange(realPart, imaginaryPart, -2, 2);
     } else if (selectedFunction == "Si(x)") {
-        integralSinus = std::make_unique<IntegralSinus<Complex>>(precision);
-        result = integralSinus->evaluate(Complex(realPart, imaginaryPart));
+        graphWidget->drawIntegralSine();
+        graphWidget->setRange(realPart, imaginaryPart, -2000, 200);
+        //integralSinus = std::make_unique<IntegralSinus<Complex>>(precision);
+        //result = integralSinus->evaluate(Complex(realPart, imaginaryPart));
     }
 
     // Отображаем результат в поле для вывода
