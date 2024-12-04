@@ -10,8 +10,8 @@ public:
     IntegralSinus(unsigned precision)
         : Function<T>(precision, generateIntegrals(precision)) {}
 
-    Array<double> generateIntegrals(int precision) {
-        Array<double> integrals;
+    Array<long double> generateIntegrals(int precision) {
+        Array<long double> integrals;
 
         // Расчет коэффициентов для ряда интегрального синуса
         for (int i = 0; i < precision; ++i) {
