@@ -10,7 +10,7 @@
 template<typename T>
 class Function : public Polynom<double> {
 public:
-    Function(unsigned precision, Array<double> derivatives) : Polynom<double>(false) {
+    Function(unsigned precision, Array<long double> derivatives) : Polynom<double>(false) {
         for (int i = 0; i < precision; i++) {
             this->GetCoeffs().GetArray().push_back(derivatives.GetArray()[i] / factorial(i));
         }
@@ -18,14 +18,14 @@ public:
 
     ~Function() = default;
 
-    long long factorial(int t_n) {
-        if (t_n == 0 || t_n == 1) return 1;
-        long long result = 1;
+    long double factorial(int t_n) {
+        long double result = 1.0;
         for (int i = 2; i <= t_n; ++i) {
             result *= i;
         }
         return result;
     }
+
 
     T evaluate(T x) {
         T result;

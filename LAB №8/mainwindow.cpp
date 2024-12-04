@@ -20,63 +20,64 @@ MainWindow::MainWindow(QWidget *parent)
     leftLayout->addWidget(functionComboBox.get());
 
     // Добавление заголовка для ввода корня
-    rootLabel = std::make_unique<QLabel>("Введите корень ниже:");
+    rootLabel = std::make_unique<QLabel>("Введите границы ниже:");
     leftLayout->addWidget(rootLabel.get());
 
-    // Контейнер для ввода действительной и мнимой части
-    complexWidget = std::make_unique<QWidget>();
-    complexLayout = std::make_unique<QHBoxLayout>(complexWidget.get());
+    // Создаем контейнеры для ввода minX/maxX и minY/maxY
+    xLayout = std::make_unique<QHBoxLayout>();
+    yLayout = std::make_unique<QHBoxLayout>();
 
-    realPartEdit = std::make_unique<QLineEdit>();
-    realPartEdit->setPlaceholderText("Дейст. часть");
+    minXEdit = std::make_unique<QLineEdit>();
+    minXEdit->setPlaceholderText("Min X");
+    minXEdit->setText("-15");
 
-    imaginaryPartEdit = std::make_unique<QLineEdit>();
-    imaginaryPartEdit->setPlaceholderText("Мним. часть");
+    maxXEdit = std::make_unique<QLineEdit>();
+    maxXEdit->setPlaceholderText("Max X");
+    maxXEdit->setText("15");
+
+    minYEdit = std::make_unique<QLineEdit>();
+    minYEdit->setPlaceholderText("Min Y");
+    minYEdit->setText("-2");
+
+    maxYEdit = std::make_unique<QLineEdit>();
+    maxYEdit->setPlaceholderText("Max Y");
+    maxYEdit->setText("2");
 
     // Настроим валидаторы для ввода данных
-    realPartEdit->setValidator(std::make_unique<QDoubleValidator>().get());
-    imaginaryPartEdit->setValidator(std::make_unique<QDoubleValidator>().get());
+    minXEdit->setValidator(std::make_unique<QDoubleValidator>().get());
+    maxXEdit->setValidator(std::make_unique<QDoubleValidator>().get());
+    minYEdit->setValidator(std::make_unique<QDoubleValidator>().get());
+    maxYEdit->setValidator(std::make_unique<QDoubleValidator>().get());
 
-    // Добавляем поля для ввода в горизонтальный макет
-    complexLayout->addWidget(realPartEdit.get());
-    complexLayout->addWidget(imaginaryPartEdit.get());
-    leftLayout->addWidget(complexWidget.get());
+    // Добавляем поля в соответствующие макеты
+    xLayout->addWidget(minXEdit.get());
+    xLayout->addWidget(maxXEdit.get());
+    yLayout->addWidget(minYEdit.get());
+    yLayout->addWidget(maxYEdit.get());
+
+    // Добавляем эти макеты в основной вертикальный макет
+    leftLayout->addLayout(xLayout.get());
+    leftLayout->addLayout(yLayout.get());
 
     // Поле для ввода точности
     precisionEdit = std::make_unique<QLineEdit>();
-    precisionEdit->setValidator(std::make_unique<QIntValidator>(1, 10).get()); // точность от 1 до 10
+    precisionEdit->setValidator(std::make_unique<QIntValidator>(1, 100).get()); // точность от 1 до 10
     precisionEdit->setPlaceholderText("Точность");
+    precisionEdit->setText("100");
     leftLayout->addWidget(precisionEdit.get());
 
     // Кнопка "Посчитать"
-    calculateButton = std::make_unique<QPushButton>("Посчитать");
+    calculateButton = std::make_unique<QPushButton>("Начертить график");
     leftLayout->addWidget(calculateButton.get());
-
-    // Поле для вывода результатов
-    resultEdit = std::make_unique<QLineEdit>();
-    resultEdit->setPlaceholderText("Результаты");
-    resultEdit->setReadOnly(true); // Поле для вывода результатов, только для чтения
-    leftLayout->addWidget(resultEdit.get());
-
     leftGroupBox->setLayout(leftLayout.get()); // Устанавливаем макет для левой группы
 
     // Правая часть (группа для графика)
     rightGroupBox = std::make_unique<QGroupBox>("График");
     rightLayout = std::make_unique<QVBoxLayout>(rightGroupBox.get());
 
-    // Создаем контейнер для центрирования метки
-    //centerWidget = std::make_unique<QWidget>();
-    //centerLayout = std::make_unique<QVBoxLayout>(centerWidget.get());
-    //centerLayout->addStretch(1); // Заполнение сверху
-
-    // Заменяем QLabel на GraphWidget для отображения графика
     graphWidget = std::make_unique<GraphWidget>();  // Используем класс, который рисует график
-    //centerLayout->addWidget(graphWidget.get());  // Добавляем виджет для графика
     rightLayout->addWidget(graphWidget.get());
 
-    //centerLayout->addStretch(1); // Заполнение снизу
-
-    rightLayout->addWidget(centerWidget.get()); // Добавляем контейнер в правый макет
     rightGroupBox->setLayout(rightLayout.get()); // Устанавливаем макет для правой группы
 
     // Разделитель между левой и правой частью
@@ -107,35 +108,25 @@ MainWindow::~MainWindow() {}
 
 void MainWindow::onCalculateButtonClicked() {
     // Получаем данные из полей
-    bool okReal, okImag;
-    double realPart = realPartEdit->text().toDouble(&okReal);  // Чтение действительной части
-    double imaginaryPart = imaginaryPartEdit->text().toDouble(&okImag);  // Чтение мнимой части
-    unsigned precision = precisionEdit->text().toUInt();
+    double maxX = maxXEdit->text().toDouble();
+    double minX = minXEdit->text().toDouble();
 
-    // Проверим, чтобы данные были введены корректно
-    if (!okReal || !okImag) {
-        resultEdit->setText("Ошибка ввода!");
-        return;
-    }
+    double maxY = maxYEdit->text().toDouble();
+    double minY = minYEdit->text().toDouble();
+
+    unsigned precision = precisionEdit->text().toUInt();
 
     // Получаем выбранную функцию из выпадающего списка
     QString selectedFunction = functionComboBox->currentText();
     Complex result(0,0);
 
     if (selectedFunction == "sin(x)") {
-        // Считаем синус для корня
-        qDebug() << precision << " "<<realPart<< " "<< imaginaryPart;
-        //complexSinus = std::make_unique<Sinus<Complex>>(precision);
-        //result = complexSinus->evaluate(Complex(realPart, imaginaryPart));
+        graphWidget->setPrecision(precision);
         graphWidget->drawSine();
-        graphWidget->setRange(realPart, imaginaryPart, -2, 2);
+        graphWidget->setRange(minX, maxX, minY, maxY);
     } else if (selectedFunction == "Si(x)") {
+        graphWidget->setPrecision(precision);
         graphWidget->drawIntegralSine();
-        graphWidget->setRange(realPart, imaginaryPart, -2000, 200);
-        //integralSinus = std::make_unique<IntegralSinus<Complex>>(precision);
-        //result = integralSinus->evaluate(Complex(realPart, imaginaryPart));
+        graphWidget->setRange(minX, maxX, minY, maxY);
     }
-
-    // Отображаем результат в поле для вывода
-    resultEdit->setText(result.GetComplexString());
 }

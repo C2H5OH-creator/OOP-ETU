@@ -9,8 +9,8 @@ class Sinus : public Function<T> {
 public:
     Sinus(unsigned precision) : Function<T>(precision, generateDerivatives(precision)) {}
 
-    Array<double> generateDerivatives(int precision) {
-        Array<double> derivatives;
+    Array<long double> generateDerivatives(int precision) {
+        Array<long double> derivatives;
 
         for (int i = 0; i < precision; i++) {
             if (i % 4 == 0) {

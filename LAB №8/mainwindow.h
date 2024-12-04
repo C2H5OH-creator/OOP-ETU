@@ -46,9 +46,16 @@ private:
     std::unique_ptr<QComboBox> functionComboBox;
     std::unique_ptr<QLabel> rootLabel;
     std::unique_ptr<QWidget> complexWidget;
-    std::unique_ptr<QHBoxLayout> complexLayout;
-    std::unique_ptr<QLineEdit> realPartEdit;
-    std::unique_ptr<QLineEdit> imaginaryPartEdit;
+
+    std::unique_ptr<QHBoxLayout> xLayout;
+    std::unique_ptr<QHBoxLayout> yLayout;
+
+    std::unique_ptr<QLineEdit> maxYEdit;
+    std::unique_ptr<QLineEdit> minYEdit;
+
+    std::unique_ptr<QLineEdit> maxXEdit;
+    std::unique_ptr<QLineEdit> minXEdit;
+
     std::unique_ptr<QLineEdit> precisionEdit;
     std::unique_ptr<QPushButton> calculateButton;
     std::unique_ptr<QLineEdit> resultEdit;
