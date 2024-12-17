@@ -16,6 +16,11 @@ public:
     // Методы для получения индексов кнопки
     int getRow() const { return row; }
     int getCol() const { return col; }
+    int getValue() const { return value; }
+
+    void setValue(int val) { value = val; }
+
+    void setCheckedByEnemy() {checked = true;}
 
 signals:
     // Этот сигнал будет использоваться, чтобы передать информацию о клике
@@ -28,9 +33,10 @@ private slots:
     }
 
 private:
-    unsigned value = 0;
-    unsigned row; // Индекс строки кнопки
-    unsigned col; // Индекс столбца кнопки  CustomButton();
+    int value = 0;
+    int row; // Индекс строки кнопки
+    int col; // Индекс столбца кнопки
+    bool checked = false;
 };
 
 #endif // CUSTOMBUTTON_H

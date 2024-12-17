@@ -114,3 +114,4 @@ MenuWindow::MenuWindow(QWidget *parent) : QWidget(parent){
 
     setLayout(mainLayout);
 }
+

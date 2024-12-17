@@ -1,61 +1,48 @@
 #ifndef CUSTOMGRID_H
 #define CUSTOMGRID_H
 
-#include <vector>
+#include <QWidget>
 #include <QPushButton>
 #include <QGridLayout>
-#include <QMessageBox>
-
-#include "custombutton.h"
+#include <QSet>
+#include <QVector>
+#include <QPair>
+#include <cmath>
+#include "custombutton.h" // Предполагаем, что CustomButton — это ваш пользовательский класс кнопки
 
 class CustomGrid : public QWidget
 {
-     Q_OBJECT
+    Q_OBJECT
+
 public:
-     CustomGrid(bool enemyGrid ,int rows, int cols, QWidget *parent = nullptr);
+    explicit CustomGrid(bool enemyGrid, int rows, int cols, QWidget *parent = nullptr);
 
-    QString getButtonValue(int t_rows, int t_cols) const {
-        if (t_rows <= rows && t_cols <= cols) {
-            unsigned index = (rows * (--t_rows)) + (--t_cols);
-            return buttons[index]->text();
-        }
-        return "";
-    }
+    bool hasSelection() const; // Метод для проверки наличия выделенных кнопок
+    QVector<QPair<int, QPoint>> getSelectedButtonsData() const; // Метод для получения данных выбранных кнопок
 
-    // Метод для установки значения кнопки
-    void setButtonValue(int t_rows, int t_cols, const QString &value) {
-        if (t_rows <= rows && t_cols <= cols) {
-            unsigned index = (rows * (--t_rows)) + (--t_cols);
-            return buttons[index]->setText(value);
-        }
-    }
+    QVector<CustomButton*>& getButtons() { return buttons; }
 
-    // Метод для получения кнопки по индексу
-    QPushButton* getButton(int t_rows, int t_cols) const {
-        if (t_rows <= rows && t_cols <= cols) {
-            unsigned index = (rows * (--t_rows)) + (--t_cols);
-            return buttons[index];
-        }
-        return nullptr;
-    }
+    int& getFieldSize() {std::sqrt(buttons.size());}
+
+    CustomButton* getButtonAt(int row, int col);
+
+signals:
+    void selectionChanged(); // Сигнал, который будет отправляться при изменении выбора
+
+public slots:
+    void resetSelection(); // Слот для сброса выделения
 
 private:
-    unsigned rows = 0;
-    unsigned cols = 0;
-    QGridLayout *layout;
-    bool enemyGrid = false;
-    std::vector<CustomButton*> buttons;
-    bool playerButtons[9];
+    void createButtons(); // Метод для создания кнопок
+    void toggleButtonSelection(CustomButton *button); // Метод для переключения состояния кнопки
+    void buttonClicked(int row, int col);
 
-    void createButtons();
-
-private slots:
-    void buttonClicked(int row, int col) {
-        // Логика обработки нажатия на кнопку
-        QMessageBox::information(nullptr, "Button Clicked",
-                                 QString("Button at (%1, %2) clicked").arg(row).arg(col));
-    }
+    int rows; // Количество строк
+    int cols; // Количество столбцов
+    bool enemyGrid; // Признак того, что это поле противника
+    QGridLayout *layout; // Лейаут для размещения кнопок
+    QVector<CustomButton*> buttons; // Вектор всех кнопок на поле
+    QSet<CustomButton*> selectedButtons; // Множество выбранных кнопок
 };
-
 
 #endif // CUSTOMGRID_H

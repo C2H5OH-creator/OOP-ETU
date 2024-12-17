@@ -12,6 +12,7 @@
 #include <QLabel>
 #include <QListView>
 #include <QStringListModel>
+#include <QMessageBox>
 
 class MenuWindow : public QWidget {
     Q_OBJECT

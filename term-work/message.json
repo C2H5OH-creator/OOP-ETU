@@ -1,0 +1,31 @@
+//type (0 - field\ready, 1 - opening cell, 2 -win)
+{
+	"type": int, 
+	"turn": int,
+	cell {
+		"row": int,
+		"col": int,
+		"value": int
+	}
+}
+
+{
+	"type": int,
+	"field_size": int,
+	"field" : [
+		{
+			"row": int,
+			"col": int,
+			"value": int
+		},
+		{...}
+	]
+}
+
+{
+	"type": int,
+	"win": {
+		"name": str
+	}
+}
+

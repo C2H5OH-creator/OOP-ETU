@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -13,13 +13,15 @@ SOURCES += \
     customgrid.cpp \
     gamewindow.cpp \
     main.cpp \
-    menuwindow.cpp
+    menuwindow.cpp \
+    udpcommunicator.cpp
 
 HEADERS += \
     custombutton.h \
     customgrid.h \
     gamewindow.h \
-    menuwindow.h
+    menuwindow.h \
+    udpcommunicator.h
 
 FORMS +=
 
