@@ -8,7 +8,8 @@
 #include <QVector>
 #include <QPair>
 #include <cmath>
-#include "custombutton.h" // Предполагаем, что CustomButton — это ваш пользовательский класс кнопки
+
+#include "custombutton.h"
 
 class CustomGrid : public QWidget
 {
@@ -22,24 +23,41 @@ public:
 
     QVector<CustomButton*>& getButtons() { return buttons; }
 
-    int& getFieldSize() {std::sqrt(buttons.size());}
+    int getFieldSize() {
+        if (buttons.isEmpty()) {
+            return 0;  // Возвращаем 0, если кнопок нет
+        }
+        return static_cast<int>(std::sqrt(buttons.size()));
+    }
+
+    void addToRightButtons(int num){ rightButtons += num;}
+    void addToSumm(int num){ summ += num;}
+
+    int getSumm(){return summ;}
+    int getRightButtons(){return rightButtons;}
+
 
     CustomButton* getButtonAt(int row, int col);
+    void updateEnemyGrid(const QVector<QVector<int>>& fieldData);
+    void toggleButtonSelection(CustomButton *button); // Метод для переключения состояния кнопки
 
 signals:
     void selectionChanged(); // Сигнал, который будет отправляться при изменении выбора
+    //void messageToSend(const QJsonObject& message);
+    void messageToSend(CustomButton* button);
 
 public slots:
     void resetSelection(); // Слот для сброса выделения
 
 private:
     void createButtons(); // Метод для создания кнопок
-    void toggleButtonSelection(CustomButton *button); // Метод для переключения состояния кнопки
     void buttonClicked(int row, int col);
 
     int rows; // Количество строк
     int cols; // Количество столбцов
     bool enemyGrid; // Признак того, что это поле противника
+    int rightButtons = 0;
+    int summ = 0;
     QGridLayout *layout; // Лейаут для размещения кнопок
     QVector<CustomButton*> buttons; // Вектор всех кнопок на поле
     QSet<CustomButton*> selectedButtons; // Множество выбранных кнопок

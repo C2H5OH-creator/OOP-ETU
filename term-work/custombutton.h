@@ -22,6 +22,14 @@ public:
 
     void setCheckedByEnemy() {checked = true;}
 
+    void setButtonStyle() {
+        if (value == 0) {
+            setStyleSheet("background-color: red;");
+        } else {
+            setStyleSheet("background-color: green;");
+        }
+    }
+
 signals:
     // Этот сигнал будет использоваться, чтобы передать информацию о клике
     void buttonClicked(int row, int col);

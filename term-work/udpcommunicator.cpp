@@ -1,12 +1,14 @@
 #include "udpcommunicator.h"
+#include "gamewindow.h"
 
 #include <QDebug>
 
 // Конструктор
-UDPCommunicator::UDPCommunicator(const QString& ip, quint16 port, QObject* parent)
-    : QObject(parent), remoteAddress_(QHostAddress(ip)), remotePort_(port) {
-    // Создаем UDP-сокет
-    udpSocket_.bind(QHostAddress::Any, port);
+// Конструктор
+UDPCommunicator::UDPCommunicator(const QString& ip, quint16 listenPort, quint16 sendPort, QObject* parent)
+    : QObject(parent), remoteAddress_(QHostAddress(ip)), listenPort_(listenPort), sendPort_(sendPort) {
+    // Создаем UDP-сокет и привязываем его для прослушивания на порту listenPort_
+    udpSocket_.bind(QHostAddress::Any, listenPort_);
 
     // Подключаем слот для обработки полученных сообщений
     connect(&udpSocket_, &QUdpSocket::readyRead, this, &UDPCommunicator::processReceivedMessage);
@@ -18,19 +20,20 @@ void UDPCommunicator::sendMessage(const QJsonObject& message) {
     QJsonDocument doc(message);
     QByteArray datagram = doc.toJson();  // Сериализуем в JSON строку (байтовый массив)
 
-    // Отправляем сообщение
-    udpSocket_.writeDatagram(datagram, remoteAddress_, remotePort_);
+    // Отправляем сообщение на порт sendPort_
+    udpSocket_.writeDatagram(datagram, remoteAddress_, sendPort_);
     qDebug() << "Message sent:" << QString(doc.toJson(QJsonDocument::Indented));
 }
 
 // Метод для начала приема сообщений
 void UDPCommunicator::startReceiving() {
-    // Слушаем порты для получения сообщений
-    udpSocket_.bind(QHostAddress::Any, remotePort_);
+    // Слушаем порт для получения сообщений
+    udpSocket_.bind(QHostAddress::Any, listenPort_);
 }
 
 // Слот для обработки полученного сообщения
 void UDPCommunicator::processReceivedMessage() {
+
     while (udpSocket_.hasPendingDatagrams()) {
         QByteArray datagram;
         datagram.resize(udpSocket_.pendingDatagramSize());
@@ -47,57 +50,49 @@ void UDPCommunicator::processReceivedMessage() {
         QJsonObject message = doc.object();
         qDebug() << "Message received:" << QString(doc.toJson(QJsonDocument::Indented));
 
-        // Обрабатываем сообщение
-        int type = message.value("type").toInt();
-
-        switch (type) {
-        case 0:
-            parseFieldReadyMessage(message);
-            break;
-        case 1:
-            parseFieldMessage(message);
-            break;
-        case 2:
-            parseWinMessage(message);
-            break;
-        default:
-            qWarning() << "Unknown message type";
-        }
+        // Испускаем сигнал с сообщением
+        emit messageReceived(message);
     }
 }
 
-
 // Функция для создания сообщения типа 0 (поле/готовность)
-QJsonObject UDPCommunicator::createFieldReadyMessage(CustomGrid& grid) {
+QJsonObject UDPCommunicator::createFieldReadyMessage(CustomGrid* grid) {
     QJsonObject message;
+    qDebug() << 1;
     message["type"] = 0;
-    message["field_size"] = grid.getFieldSize();
+    qDebug() << 12;
+    message["field_size"] = grid->getFieldSize();
 
+    qDebug() << 2;
     // Создаем массив для поля
     QJsonArray fieldArray;
-    QVector buttons = grid.getButtons();
+        int i = 10;
+    QVector buttons = grid->getButtons();
     for (const auto& button : buttons) {
         QJsonObject cell;
+        qDebug() << i++;
         cell["row"] = button->getRow();
         cell["col"] = button->getCol();
         cell["value"] = button->getValue();
         fieldArray.append(cell);
     }
+    qDebug() << 3;
 
     message["field"] = fieldArray;
+    qDebug() << "Сообщение собрано";
     return message;
 }
 
 // Функция для создания сообщения типа 1 (поле)
-QJsonObject UDPCommunicator::createFieldMessage(int turn, CustomButton& button) {
+QJsonObject UDPCommunicator::createFieldMessage(int turn, CustomButton* button) {
     QJsonObject message;
     message["type"] = 1;
     message["turn"] = turn;
 
     QJsonObject cell;
-    cell["row"] = button.getRow();
-    cell["col"] = button.getCol();
-    cell["value"] = button.getValue();
+    cell["row"] = button->getRow();
+    cell["col"] = button->getCol();
+    cell["value"] = button->getValue();
 
     message["cell"] = cell;
 
@@ -131,21 +126,39 @@ void UDPCommunicator::parseFieldReadyMessage(const QJsonObject& message) {
         int col = cell["col"].toInt();
         int cellValue = cell["value"].toInt();
 
+        if (cellValue != 0) {
+            opponentGrid->addToSumm(cellValue);
+            opponentGrid->addToRightButtons(1);
+        }
+
         CustomButton* button = opponentGrid->getButtonAt(row, col);
         if (button) {
             button->setValue(cellValue);
+
+            connect(button, &QPushButton::clicked, [this, button,opponentGrid]() {
+                // Вызываем метод toggleButtonSelection для текущего объекта CustomGrid
+                opponentGrid->toggleButtonSelection(button);
+            });
         }
     }
 
-    qDebug() << "Field size:" << fieldSize;
-    for (CustomButton* button : opponentGrid->getButtons()) {
-        qDebug() << "Cell (" << button->getRow() << ", " << button->getCol() << "):" << button->getValue();
-    }
+    //qDebug() << "Field size:" << fieldSize;
+    //for (CustomButton* button : opponentGrid->getButtons()) {
+      //  qDebug() << "Cell (" << button->getRow() << ", " << button->getCol() << "):" << button->getValue();
+    //}
 }
 
 // Парсер для сообщения типа 1 (поле)
 void UDPCommunicator::parseFieldMessage(const QJsonObject& message) {
     int turn = message["turn"].toInt();
+    auto opponentGrid = gameWindow->getOpponentGrid();
+
+    if (turn > 50 || opponentGrid->getRightButtons()) {
+        this->sendMessage(this->createWinMessage(gameWindow->windowTitle()));
+        QMessageBox::information(gameWindow, "Конец игры!", "Победил " + gameWindow->windowTitle());
+        return;
+    }
+    gameWindow->setTurn(turn);
     QJsonObject cell = message["cell"].toObject();
     int row = cell["row"].toInt();
     int col = cell["col"].toInt();

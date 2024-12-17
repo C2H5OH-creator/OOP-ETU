@@ -17,7 +17,7 @@ void CustomGrid::createButtons() {
             unsigned row = i / cols;
             unsigned col = i % cols;
 
-            // Создаем кнопку с "?" для противника
+            // Создаем кнопку с неизвестным значением для противника
             auto button = new CustomButton(0, row, col, "?");
             button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
             button->setMinimumSize(50, 50);
@@ -25,27 +25,17 @@ void CustomGrid::createButtons() {
             buttons.push_back(button);
             layout->addWidget(button, row, col);
 
-            connect(button, &QPushButton::clicked, [this, row, col]() {
-                buttonClicked(row, col);
-            });
+
         }
     } else {
         // Поле игрока
-        std::vector<int> values(rows * cols);
-
-        // Заполняем вектор случайными числами от 1 до 100
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<int> dist(1, 1000);
-        std::generate(values.begin(), values.end(), [&]() { return dist(gen); });
-
-        // Создаём кнопки с числами
+        // Поле игрока (по умолчанию нули)
         for (unsigned i = 0; i < rows * cols; ++i) {
             unsigned row = i / cols;
             unsigned col = i % cols;
 
-            // Создаём кнопку с числом
-            auto button = new CustomButton(values[i], row, col, QString::number(values[i]));
+            // Создаём кнопку с "0"
+            auto button = new CustomButton(0, row, col, "0");
             button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
             button->setMinimumSize(50, 50);
 
@@ -61,42 +51,63 @@ void CustomGrid::createButtons() {
 }
 
 void CustomGrid::toggleButtonSelection(CustomButton *button) {
-    // Получаем строку и столбец кнопки
     int row = button->getRow();
     int col = button->getCol();
 
-    // Если кнопка уже выбрана, снимаем выделение
-    if (selectedButtons.contains(button)) {
-        button->setStyleSheet(""); // Сбрасываем стиль
-        selectedButtons.remove(button);
-    } else {
-        // Проверяем, не соседствует ли эта кнопка с уже выбранными
-        bool canSelect = true;
+    if(!enemyGrid){
+        if (selectedButtons.contains(button)) {
+            // Если кнопка уже выбрана, отменяем выбор
+            int removedOrder = button->getValue();
+            button->setValue(0);
+            button->setText("0");
+            button->setStyleSheet(""); // Сброс стиля
+            selectedButtons.remove(button);
 
-        // Проверяем соседей по горизонтали и вертикали
-        for (auto *selectedButton : selectedButtons) {
-            int selectedRow = selectedButton->getRow();
-            int selectedCol = selectedButton->getCol();
+            // Обновляем порядковые номера оставшихся кнопок
+            for (auto *selectedButton : selectedButtons) {
+                int currentOrder = selectedButton->getValue();
+                if (currentOrder > removedOrder) {
+                    selectedButton->setValue(currentOrder - 1);
+                    selectedButton->setText(QString::number(currentOrder - 1));
+                }
+            }
+        } else if (selectedButtons.size() < 9) {
+            // Проверяем соседство с уже выбранными кнопками
+            bool canSelect = true;
+            for (auto *selectedButton : selectedButtons) {
+                int selectedRow = selectedButton->getRow();
+                int selectedCol = selectedButton->getCol();
 
-            // Если сосед по горизонтали или вертикали
-            if ((std::abs(selectedRow - row) == 1 && selectedCol == col) ||
-                (std::abs(selectedCol - col) == 1 && selectedRow == row)) {
-                canSelect = false;
-                break; // Если нашли соседей, можно не продолжать проверку
+                // Проверяем, не является ли кнопка смежной по вертикали или горизонтали
+                if ((std::abs(selectedRow - row) == 1 && selectedCol == col) ||
+                    (std::abs(selectedCol - col) == 1 && selectedRow == row)) {
+                    canSelect = false;
+                    break; // Нельзя выбирать смежные по вертикали или горизонтали
+                }
+            }
+
+            // Если можно выбрать кнопку
+            if (canSelect) {
+                int newOrder = selectedButtons.size() + 1;
+                button->setValue(newOrder);
+                button->setText(QString::number(newOrder));
+                button->setStyleSheet("background-color: green;"); // Зелёный цвет для выбора
+                selectedButtons.insert(button);
             }
         }
+    } else {
+        button->setText(QString::number(button->getValue()));
 
-        // Если соседей нет, можно выделить кнопку
-        if (canSelect && selectedButtons.size() < 9) {
-            button->setStyleSheet("background-color: green;");
-            selectedButtons.insert(button);
-        }
+        (button->getValue() == 0)
+            ? (button->setStyleSheet("background-color: red;"))
+            : (button->setStyleSheet("background-color: green;"));
+        // Эмитируем сигнал
+        emit messageToSend(button);
     }
 
     // Генерируем сигнал о изменении выбора
     emit selectionChanged();
 }
-
 
 bool CustomGrid::hasSelection() const {
     return !selectedButtons.empty(); // Есть ли выбранные кнопки
@@ -121,9 +132,11 @@ QVector<QPair<int, QPoint>> CustomGrid::getSelectedButtonsData() const {
 
 void CustomGrid::resetSelection() {
     // Сбрасываем выбор всех кнопок
-    for (auto *button : selectedButtons) {
-        button->setStyleSheet(""); // Убираем цвет
-        button->setChecked(false); // Отжимаем кнопку
+    for (auto *button : buttons) {
+        button->setStyleSheet("");   // Сбрасываем стиль
+        button->setChecked(false);   // Сбрасываем состояние нажатия
+        button->setValue(0);         // Возвращаем значение кнопки к 0
+        button->setText("0");        // Возвращаем текст кнопки к "0"
     }
 
     // Очищаем список выбранных кнопок
@@ -132,6 +145,7 @@ void CustomGrid::resetSelection() {
     // Генерируем сигнал о изменении выбора
     emit selectionChanged();
 }
+
 
 CustomButton* CustomGrid::getButtonAt(int row, int col) {
     for (CustomButton* button : buttons) {
@@ -142,4 +156,17 @@ CustomButton* CustomGrid::getButtonAt(int row, int col) {
     return nullptr;  // Если кнопка не найдена
 }
 
+void CustomGrid::updateEnemyGrid(const QVector<QVector<int>>& fieldData) {
+    for (int row = 0; row < rows; ++row) {
+        for (int col = 0; col < cols; ++col) {
+            CustomButton *button = getButtonAt(row, col);
+            if (button) {
+                int value = fieldData[row][col];
+                button->setValue(value);
+                button->setButtonStyle();  // Обновляем стиль кнопки в зависимости от значения
+                button->setText(value == 0 ? "0" : QString::number(value));  // Показываем текст
+            }
+        }
+    }
+}
 

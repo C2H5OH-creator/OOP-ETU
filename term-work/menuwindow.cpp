@@ -87,21 +87,28 @@ MenuWindow::MenuWindow(QWidget *parent) : QWidget(parent){
 
         if (isLocalGame) {
             // Локальная игра, открываем два игровых окна с введённым размером поля
-            GameWindow *gameWindow1 = new GameWindow("Локальная игра (Игрок 1)", fieldSize);
+
+            GameWindow *gameWindow1 = new GameWindow(
+                                        "Локальная игра (Игрок 1)",
+                                        fieldSize,4000,4001);
+
             gameWindow1->setWindowTitle("Игрок 1");
             gameWindow1->resize(300, 200);
             gameWindow1->show();
 
-            GameWindow *gameWindow2 = new GameWindow("Локальная игра (Игрок 2)", fieldSize);
+            GameWindow *gameWindow2 = new GameWindow(
+                                        "Локальная игра (Игрок 2)",
+                                        fieldSize,
+                                        4001,4000);
             gameWindow2->setWindowTitle("Игрок 2");
             gameWindow2->resize(300, 200);
             gameWindow2->show();
         }
         else if (isCreateGame) {
             // Создание игры с указанным названием
-            GameWindow *gameWindow = new GameWindow("Игра: " + gameName, fieldSize);
-            gameWindow->resize(300, 200);
-            gameWindow->show();
+            //GameWindow *gameWindow = new GameWindow("Игра: " + gameName, fieldSize);
+            //gameWindow->resize(300, 200);
+            //gameWindow->show();
         }
         else if (joinGameRadio->isChecked()) {
             // Подключение к игре (пока заглушка)
