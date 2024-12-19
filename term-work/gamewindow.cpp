@@ -136,6 +136,10 @@ void GameWindow::onMessageReceived(const QJsonObject& message) {
         qDebug() << "Get General Field Data message received in" << this->windowTitle();
         communicator->parseGeneralFieldDataMessage(message);
         break;
+    case 4:
+        qDebug() << "Get General Field Data message received in" << this->windowTitle();
+        communicator->parseGetSummMessage(message);
+        break;
     default:
         qWarning() << "Unknown message type in" << this->windowTitle();
     }

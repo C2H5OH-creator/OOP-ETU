@@ -105,6 +105,9 @@ QJsonObject UDPCommunicator::createFieldMessage(int turn, CustomButton* button) 
         QMessageBox::information(gameWindow, "Конец игры!", "Победил " + gameWindow->windowTitle());
         return QJsonObject();
     }
+    else if(turn > 50){
+        this->sendMessage(this->createGetSummDataMessage());
+    }
 
     return message;
 }
@@ -119,6 +122,26 @@ QJsonObject UDPCommunicator::createWinMessage(const QString& name) {
 
     message["win"] = winObject;
 
+    return message;
+}
+
+
+QJsonObject UDPCommunicator::createGetSummDataMessage(){
+    QJsonObject message;
+    message["type"] = 4;
+    message["request"] = "get";
+    message["summ"] = 0;
+    message["name"] = "";
+    return message;
+
+}
+
+QJsonObject UDPCommunicator::createSummDataMessage(int summ, const QString& name){
+    QJsonObject message;
+    message["type"] = 4;
+    message["request"] = "post";
+    message["summ"] = summ;
+    message["name"] = name;
     return message;
 }
 
@@ -157,7 +180,6 @@ void UDPCommunicator::parseGeneralFieldDataMessage(const QJsonObject& message){
         gameWindow->updateGrids(newFieldSize);
     }
 }
-
 
 // Парсер для сообщения типа 0 (поле/готовность)
 void UDPCommunicator::parseFieldReadyMessage(const QJsonObject& message) {
@@ -224,3 +246,23 @@ void UDPCommunicator::parseWinMessage(const QJsonObject& message) {
 
     qDebug() << "Winner is" << winnerName;
 }
+
+void UDPCommunicator::parseGetSummMessage(const QJsonObject& message) {
+    int summ = message["summ"].toInt();
+    QString name = message["name"].toString();
+
+    if(message["request"].toString() == "get"){
+        int summ = gameWindow->getOpponentGrid()->getSumm();
+        QString nikname = gameWindow->getNikname();
+        this->sendMessage(this->createSummDataMessage(summ, nikname));
+    }
+    else {
+        if(summ > gameWindow->getOpponentGrid()->getSumm()){
+            QMessageBox::information(gameWindow, "Конец игры!", "Победил " + name);
+        }
+        else{
+           QMessageBox::information(gameWindow, "Конец игры!", "Победил " + gameWindow->getNikname());
+        }
+    }
+}
+

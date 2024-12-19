@@ -43,6 +43,9 @@ public:
 
     QJsonObject createGeneralFieldDataMessage(const QString& name, int fieldSize);
 
+    QJsonObject createGetSummDataMessage();
+    QJsonObject createSummDataMessage(int summ, const QString& name);
+
     // Функция для обработки сообщения типа 0 (поле/готовность)
     void parseFieldReadyMessage(const QJsonObject& message);
 
@@ -54,6 +57,8 @@ public:
 
     // Функция для обработки сообщения типа 3 (запрос имени)
     void parseGeneralFieldDataMessage(const QJsonObject& message);
+
+    void parseGetSummMessage(const QJsonObject& message);
 
 private slots:
     // Слот для обработки полученного сообщения
