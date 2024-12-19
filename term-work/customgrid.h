@@ -16,7 +16,7 @@ class CustomGrid : public QWidget
     Q_OBJECT
 
 public:
-    explicit CustomGrid(bool enemyGrid, int rows, int cols, QWidget *parent = nullptr);
+    explicit CustomGrid(bool isGameCreator, bool enemyGrid, int rows, int cols,int &turn, QWidget *parent = nullptr);
 
     bool hasSelection() const; // Метод для проверки наличия выделенных кнопок
     QVector<QPair<int, QPoint>> getSelectedButtonsData() const; // Метод для получения данных выбранных кнопок
@@ -35,7 +35,9 @@ public:
 
     int getSumm(){return summ;}
     int getRightButtons(){return rightButtons;}
+    int getRightFoundedButtons(){return rightFoundedButtons;}
 
+    void updateGrid(int newRows, int newCols);
 
     CustomButton* getButtonAt(int row, int col);
     void updateEnemyGrid(const QVector<QVector<int>>& fieldData);
@@ -55,9 +57,13 @@ private:
 
     int rows; // Количество строк
     int cols; // Количество столбцов
+    int &turn;
     bool enemyGrid; // Признак того, что это поле противника
     int rightButtons = 0;
+    int rightFoundedButtons = 0;
     int summ = 0;
+    bool isGameCreator = false;
+
     QGridLayout *layout; // Лейаут для размещения кнопок
     QVector<CustomButton*> buttons; // Вектор всех кнопок на поле
     QSet<CustomButton*> selectedButtons; // Множество выбранных кнопок

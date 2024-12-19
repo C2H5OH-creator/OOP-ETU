@@ -4,8 +4,8 @@
 #include <QDebug>
 
 // Конструктор
-// Конструктор
-UDPCommunicator::UDPCommunicator(const QString& ip, quint16 listenPort, quint16 sendPort, QObject* parent)
+UDPCommunicator::UDPCommunicator(quint16 listenPort, quint16 sendPort, const QString& ip, QObject* parent)
+
     : QObject(parent), remoteAddress_(QHostAddress(ip)), listenPort_(listenPort), sendPort_(sendPort) {
     // Создаем UDP-сокет и привязываем его для прослушивания на порту listenPort_
     udpSocket_.bind(QHostAddress::Any, listenPort_);
@@ -62,6 +62,7 @@ QJsonObject UDPCommunicator::createFieldReadyMessage(CustomGrid* grid) {
     message["type"] = 0;
     qDebug() << 12;
     message["field_size"] = grid->getFieldSize();
+    //message["field_size"] =
 
     qDebug() << 2;
     // Создаем массив для поля
@@ -96,6 +97,15 @@ QJsonObject UDPCommunicator::createFieldMessage(int turn, CustomButton* button) 
 
     message["cell"] = cell;
 
+    auto opponentGrid = gameWindow->getOpponentGrid();
+
+    qDebug() << opponentGrid->getRightButtons() << " " << opponentGrid->getRightFoundedButtons();
+    if (opponentGrid->getRightButtons() == opponentGrid->getRightFoundedButtons()) {
+        this->sendMessage(this->createWinMessage(gameWindow->windowTitle()));
+        QMessageBox::information(gameWindow, "Конец игры!", "Победил " + gameWindow->windowTitle());
+        return QJsonObject();
+    }
+
     return message;
 }
 
@@ -111,6 +121,43 @@ QJsonObject UDPCommunicator::createWinMessage(const QString& name) {
 
     return message;
 }
+
+QJsonObject UDPCommunicator::createGetGeneralFieldDataMessage(){
+    QJsonObject message;
+    message["type"] = 3;
+    message["request"] = "get";
+    message["game_name"] = "";
+    message["field_size"] = 0;
+    return message;
+
+}
+
+QJsonObject UDPCommunicator::createGeneralFieldDataMessage(const QString& name, int fieldSize){
+    QJsonObject message;
+    message["type"] = 3;
+    message["game_name"] = name;
+    message["field_size"] = fieldSize;
+    message["request"] = "post";
+
+    return message;
+
+}
+
+void UDPCommunicator::parseGeneralFieldDataMessage(const QJsonObject& message){
+    QString gameName = message["game_name"].toString();
+    int newFieldSize = message["field_size"].toInt();
+
+    if(message["request"].toString() == "get"){
+        QString name = gameWindow->getGameName();
+        int fieldSize = gameWindow->getPlayerGrid()->getFieldSize();
+        this->sendMessage(this->createGeneralFieldDataMessage(name, fieldSize));
+    }
+    else {
+        gameWindow->setWindowTitle("Игра - " + gameName + " : " + "Игрок - " + gameWindow->getNikname());
+        gameWindow->updateGrids(newFieldSize);
+    }
+}
+
 
 // Парсер для сообщения типа 0 (поле/готовность)
 void UDPCommunicator::parseFieldReadyMessage(const QJsonObject& message) {
@@ -153,9 +200,9 @@ void UDPCommunicator::parseFieldMessage(const QJsonObject& message) {
     int turn = message["turn"].toInt();
     auto opponentGrid = gameWindow->getOpponentGrid();
 
-    if (turn > 50 || opponentGrid->getRightButtons()) {
+    if (opponentGrid->getRightButtons() == opponentGrid->getRightFoundedButtons()) {
         this->sendMessage(this->createWinMessage(gameWindow->windowTitle()));
-        QMessageBox::information(gameWindow, "Конец игры!", "Победил " + gameWindow->windowTitle());
+        QMessageBox::information(gameWindow, "Конец игры!", "Победил " + gameWindow->getNikname());
         return;
     }
     gameWindow->setTurn(turn);
@@ -177,4 +224,3 @@ void UDPCommunicator::parseWinMessage(const QJsonObject& message) {
 
     qDebug() << "Winner is" << winnerName;
 }
-

@@ -3,16 +3,26 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QMessageBox>
+#include <QDebug>
 
 GameWindow::GameWindow(const QString &title,
+                       const QString &nikname,
                        int fieldSize,
                        quint16 sendPort,
-                       quint16 receivePort,
-                       QWidget *parent)
-    : QWidget(parent), playerGrid(nullptr), opponentGrid(nullptr), readyButton(nullptr) {
-    setWindowTitle(title);
+                       bool isGameCreator,
+                       QWidget *parent,
+                       const QString& ip)
+    : QWidget(parent), playerGrid(nullptr), opponentGrid(nullptr), isGameCreator(isGameCreator), readyButton(nullptr), nikname(nikname), gameName(title) {
+    setWindowTitle("Игра - " + title + " : Игрок - " + nikname);
 
-    communicator = new UDPCommunicator("127.0.0.1",receivePort,sendPort, this);
+    if (isGameCreator) {
+        receivePort = sendPort + 1;
+    }
+    else{
+        sendPort++;
+        receivePort = sendPort - 1;
+    }
+    communicator = new UDPCommunicator(receivePort,sendPort, ip, this);
     communicator->setGameWindow(this);
 
     // Основной вертикальный лэйаут для всего окна
@@ -37,10 +47,9 @@ GameWindow::GameWindow(const QString &title,
     QHBoxLayout *gridLayout = new QHBoxLayout;
 
     // Создание полей
-    playerGrid = new CustomGrid(false, fieldSize, fieldSize);
-    opponentGrid = new CustomGrid(true, fieldSize, fieldSize);
-
-    //opponentGrid->setUPD(communicator);
+    qDebug() << isGameCreator;
+    playerGrid = new CustomGrid(isGameCreator, false, fieldSize, fieldSize, turn);
+    opponentGrid = new CustomGrid(isGameCreator, true, fieldSize, fieldSize, turn);
 
     // Добавляем сетки в горизонтальный лэйаут
     gridLayout->addWidget(playerGrid);
@@ -97,6 +106,16 @@ void GameWindow::updateReadyButtonState() {
     readyButton->setEnabled(playerGrid->hasSelection());
 }
 
+void GameWindow::updateGrids(int newSize) {
+    if (playerGrid) {
+        playerGrid->updateGrid(newSize, newSize);
+    }
+    if (opponentGrid) {
+        opponentGrid->updateGrid(newSize, newSize);
+    }
+}
+
+
 void GameWindow::onMessageReceived(const QJsonObject& message) {
     int type = message.value("type").toInt();
 
@@ -112,6 +131,10 @@ void GameWindow::onMessageReceived(const QJsonObject& message) {
     case 2:
         qDebug() << "Win message received in" << this->windowTitle();
         communicator->parseWinMessage(message);
+        break;
+    case 3:
+        qDebug() << "Get General Field Data message received in" << this->windowTitle();
+        communicator->parseGeneralFieldDataMessage(message);
         break;
     default:
         qWarning() << "Unknown message type in" << this->windowTitle();

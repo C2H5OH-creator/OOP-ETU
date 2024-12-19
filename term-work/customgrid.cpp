@@ -2,9 +2,11 @@
 #include <random>
 #include <vector>
 #include <algorithm>
+#include <QMessageBox>
+#include <QDebug>
 
-CustomGrid::CustomGrid(bool enemyGrid, int rows, int cols, QWidget *parent)
-    : QWidget(parent), rows(rows), cols(cols), enemyGrid(enemyGrid) {
+CustomGrid::CustomGrid(bool isGameCreator, bool enemyGrid, int rows, int cols,int &turn, QWidget *parent)
+    : QWidget(parent), rows(rows), cols(cols), enemyGrid(enemyGrid),isGameCreator(isGameCreator), turn(turn) {
     layout = new QGridLayout(this);
     setLayout(layout);
     createButtons();
@@ -55,6 +57,7 @@ void CustomGrid::toggleButtonSelection(CustomButton *button) {
     int col = button->getCol();
 
     if(!enemyGrid){
+        qDebug() << 1;
         if (selectedButtons.contains(button)) {
             // Если кнопка уже выбрана, отменяем выбор
             int removedOrder = button->getValue();
@@ -62,7 +65,7 @@ void CustomGrid::toggleButtonSelection(CustomButton *button) {
             button->setText("0");
             button->setStyleSheet(""); // Сброс стиля
             selectedButtons.remove(button);
-
+            qDebug() << 2;
             // Обновляем порядковые номера оставшихся кнопок
             for (auto *selectedButton : selectedButtons) {
                 int currentOrder = selectedButton->getValue();
@@ -72,6 +75,7 @@ void CustomGrid::toggleButtonSelection(CustomButton *button) {
                 }
             }
         } else if (selectedButtons.size() < 9) {
+            qDebug() << 3;
             // Проверяем соседство с уже выбранными кнопками
             bool canSelect = true;
             for (auto *selectedButton : selectedButtons) {
@@ -96,13 +100,30 @@ void CustomGrid::toggleButtonSelection(CustomButton *button) {
             }
         }
     } else {
-        button->setText(QString::number(button->getValue()));
+        //qDebug() << 4<< " " << isGameCreator << " " << turn;
+        if(!button->isAlreadyChecked()){
+            if((isGameCreator && (turn % 2 == 0)) || (!isGameCreator && (turn % 2 != 0))){
+                button->setText(QString::number(button->getValue()));
 
-        (button->getValue() == 0)
-            ? (button->setStyleSheet("background-color: red;"))
-            : (button->setStyleSheet("background-color: green;"));
-        // Эмитируем сигнал
-        emit messageToSend(button);
+                if(button->getValue() == 0){
+                    button->setStyleSheet("background-color: red;");
+                    button->setAlreadyChecked();
+                }
+                else{
+                    button->setStyleSheet("background-color: green;");
+                    button->setAlreadyChecked();
+                    rightFoundedButtons++;
+                }
+                // Эмитируем сигнал
+                emit messageToSend(button);
+            }
+            else {
+                QMessageBox::information(this, "Не-а!", "Сейчас не ваш ход!");
+            }
+        }
+        else{
+            QMessageBox::information(this, "Зачем?", "Вы уже проверяли эту клетку...");
+        }
     }
 
     // Генерируем сигнал о изменении выбора
@@ -169,4 +190,23 @@ void CustomGrid::updateEnemyGrid(const QVector<QVector<int>>& fieldData) {
         }
     }
 }
+
+void CustomGrid::updateGrid(int newRows, int newCols) {
+    // Удаляем существующие кнопки
+    for (CustomButton *button : buttons) {
+        layout->removeWidget(button);
+        delete button;
+    }
+    buttons.clear();
+
+    // Обновляем размеры
+    rows = newRows;
+    cols = newCols;
+
+    // Создаем новые кнопки
+    createButtons();
+    // Обновляем layout
+    layout->update();
+}
+
 

@@ -18,6 +18,17 @@ class MenuWindow : public QWidget {
     Q_OBJECT
 public:
     MenuWindow(QWidget *parent = nullptr);
+private:
+    QLineEdit *fieldSizeInput;
+
+    QLineEdit *gameNameInput;
+
+    QLineEdit *ipInput;
+
+    QLineEdit *portInput;
+
+    QLineEdit *niknameInput;
+
 
 };
 

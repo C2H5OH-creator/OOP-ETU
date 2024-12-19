@@ -20,7 +20,7 @@ class UDPCommunicator : public QObject {
 
 public:
     // Конструктор
-    UDPCommunicator(const QString& ip, quint16 listenPort, quint16 sendPort, QObject* parent = nullptr);
+    UDPCommunicator(quint16 listenPort, quint16 sendPort, const QString& ip = "127.0.0.1", QObject* parent = nullptr);
 
     void setGameWindow(GameWindow* t_gameWindow){ gameWindow = t_gameWindow; }
 
@@ -39,6 +39,10 @@ public:
     // Функция для создания сообщения типа 2 (победа)
     QJsonObject createWinMessage(const QString& name);
 
+    QJsonObject createGetGeneralFieldDataMessage();
+
+    QJsonObject createGeneralFieldDataMessage(const QString& name, int fieldSize);
+
     // Функция для обработки сообщения типа 0 (поле/готовность)
     void parseFieldReadyMessage(const QJsonObject& message);
 
@@ -48,10 +52,8 @@ public:
     // Функция для обработки сообщения типа 2 (победа)
     void parseWinMessage(const QJsonObject& message);
 
-    struct Sides{
-        UDPCommunicator* yourUdp;
-        UDPCommunicator* enemyUDP;
-    };
+    // Функция для обработки сообщения типа 3 (запрос имени)
+    void parseGeneralFieldDataMessage(const QJsonObject& message);
 
 private slots:
     // Слот для обработки полученного сообщения

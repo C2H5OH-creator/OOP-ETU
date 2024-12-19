@@ -20,15 +20,25 @@ public:
 
     void setValue(int val) { value = val; }
 
-    void setCheckedByEnemy() {checked = true;}
+    void setCheckedByEnemy() {
+        checkedByEnemy= true;
+        setStyleSheet("background-color: blue;");
+    }
+
+    void setAlreadyChecked() { alreadyCheched = true;}
+
 
     void setButtonStyle() {
         if (value == 0) {
             setStyleSheet("background-color: red;");
+
         } else {
             setStyleSheet("background-color: green;");
+            alreadyCheched = true;
         }
     }
+
+    bool isAlreadyChecked(){return alreadyCheched;}
 
 signals:
     // Этот сигнал будет использоваться, чтобы передать информацию о клике
@@ -44,7 +54,8 @@ private:
     int value = 0;
     int row; // Индекс строки кнопки
     int col; // Индекс столбца кнопки
-    bool checked = false;
+    bool checkedByEnemy = false;
+    bool alreadyCheched = false;
 };
 
 #endif // CUSTOMBUTTON_H
